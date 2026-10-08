@@ -28,11 +28,11 @@ jobs:
       - name: Build Angular (base https://pmonesterolo95.github.io/AutoCheck/)
         run: npx ng build --output-path=dist/autocheck --base-href=/AutoCheck/
       - name: SPA fallback para rutas deep-link
-        run: cp dist/autocheck/index.html dist/autocheck/404.html
+        run: cp dist/autocheck/browser/index.html dist/autocheck/browser/404.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/autocheck
+          path: dist/autocheck/browser
 
   deploy:
     needs: build
