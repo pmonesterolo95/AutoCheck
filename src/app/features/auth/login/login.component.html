@@ -1,0 +1,58 @@
+<app-auth-shell title="Iniciar sesión" subtitle="Accedé a tu cuenta de AutoCheck">
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label class="form-label" for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        class="form-control"
+        [class.is-invalid]="!!fieldError('email')"
+        formControlName="email"
+        placeholder="tu@email.com"
+        autocomplete="email"
+      />
+      @if (fieldError('email'); as msg) {
+        <span class="form-error">{{ msg }}</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="password">Contraseña</label>
+      <input
+        id="password"
+        type="password"
+        class="form-control"
+        [class.is-invalid]="!!fieldError('password')"
+        formControlName="password"
+        placeholder="••••••••"
+        autocomplete="current-password"
+      />
+      @if (fieldError('password'); as msg) {
+        <span class="form-error">{{ msg }}</span>
+      }
+    </div>
+
+    <button class="btn btn-primary btn-block" type="submit" [disabled]="loading()">
+      @if (loading()) {
+        <span class="spinner"></span> Ingresando...
+      } @else {
+        Ingresar
+      }
+    </button>
+  </form>
+
+  <div class="links">
+    <a routerLink="/auth/forgot-password">¿Olvidaste tu contraseña?</a>
+    <span class="text-muted">¿No tenés cuenta? <a routerLink="/auth/register">Registrate</a></span>
+  </div>
+
+  <div class="demo box">
+    <strong>Datos de prueba</strong>
+    <span>usuario@test.com · AutoCheck2024!</span>
+    <span>admin@test.com · AutoCheck2024!</span>
+  </div>
+</app-auth-shell>

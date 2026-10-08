@@ -1,0 +1,107 @@
+<div class="flex-between wrap">
+  <div>
+    <h2>Documentación</h2>
+    <p class="text-muted small mb-2">
+      Seguro, VTV/RTO, patente y otros documentos de tus vehículos.
+    </p>
+  </div>
+  <div class="flex">
+    @if (vehicleId) {
+      <a class="btn btn-outline" [routerLink]="['/vehicles', vehicleId]">← Vehículo</a>
+    }
+    <button class="btn btn-primary" type="button" (click)="openNew()">+ Registrar documento</button>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="page-loading"><span class="spinner"></span> Cargando documentación...</div>
+} @else if (list().length === 0) {
+  <div class="card empty-state">
+    <div class="icon">📄</div>
+    <h3>No hay documentos registrados</h3>
+    <p>Registrá tus seguros, VTV/RTO y otros documentos para recibir alertas de vencimiento.</p>
+  </div>
+} @else {
+  <div class="grid grid-3">
+    @for (doc of list(); track doc.id) {
+      <div class="card doc-card">
+        <div class="flex-between">
+          <h3 class="mb-0">{{ doc.type }}</h3>
+          @if (!vehicleId) {
+            <span class="small text-muted">{{ vehicleLabel(doc.vehicle_id) }}</span>
+          }
+        </div>
+
+        <div class="status-line">
+          <app-status-badge [status]="statusOf(doc)" [label]="doc.expiration_date ? statusLabel(doc) : ''" />
+        </div>
+
+        <p class="small text-muted mb-2">{{ doc.notes || 'Sin observaciones' }}</p>
+
+        @if (doc.document_url) {
+          <button class="btn btn-outline btn-sm" type="button" (click)="download(doc)">⬇ Descargar archivo</button>
+        }
+
+        <div class="flex actions mt-2">
+          <button class="btn btn-ghost btn-sm" type="button" (click)="openEdit(doc)">✎ Editar</button>
+          <button class="btn btn-ghost btn-sm text-danger" type="button" (click)="remove(doc)">🗑</button>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Modal -->
+<app-modal [open]="showModal()" [title]="editing() ? 'Editar documento' : 'Registrar documento'" (close)="closeModal()">
+  @if (formError()) {
+    <div class="alert alert-error">{{ formError() }}</div>
+  }
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label class="form-label" for="doc_vehicle">Vehículo *</label>
+      <select id="doc_vehicle" class="form-control" formControlName="vehicle_id">
+        @for (v of vehiclesService.vehicles(); track v.id) {
+          <option [value]="v.id">{{ v.brand }} {{ v.model }} ({{ v.license_plate || v.unit_number }})</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="doc_type">Tipo de documento *</label>
+      <select id="doc_type" class="form-control" formControlName="type">
+        <option value="" disabled>Seleccioná un tipo...</option>
+        @for (t of docTypes; track t) {
+          <option [value]="t">{{ t }}</option>
+        }
+      </select>
+      @if (form.get('type')?.invalid && form.get('type')?.touched) {
+        <span class="form-error">Seleccioná un tipo de documento.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="doc_exp">Fecha de vencimiento</label>
+      <input id="doc_exp" type="date" class="form-control" formControlName="expiration_date" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="doc_notes">Observaciones</label>
+      <input id="doc_notes" type="text" class="form-control" formControlName="notes" placeholder="Compañía, número de póliza..." />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="doc_file">Archivo (opcional)</label>
+      <input id="doc_file" type="file" class="form-control" (change)="onFileSelected($event)" />
+      @if (selectedFile()) {
+        <span class="form-hint">Archivo seleccionado: {{ selectedFile()?.name }}</span>
+      }
+    </div>
+
+    <div class="flex mt-2">
+      <button class="btn btn-primary" type="submit" [disabled]="saving()">
+        @if (saving()) { <span class="spinner"></span> Guardando... } @else { {{ editing() ? 'Guardar cambios' : 'Registrar documento' }} }
+      </button>
+      <button class="btn btn-outline" type="button" (click)="closeModal()">Cancelar</button>
+    </div>
+  </form>
+</app-modal>

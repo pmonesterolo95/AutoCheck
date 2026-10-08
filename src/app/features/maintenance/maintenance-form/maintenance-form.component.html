@@ -1,0 +1,69 @@
+<div class="card">
+  <a class="btn btn-ghost btn-sm back" [routerLink]="['/vehicles', vehicleId, 'maintenances']">← Volver al historial</a>
+
+  <h2>{{ isEdit() ? 'Editar mantenimiento' : 'Registrar mantenimiento' }}</h2>
+  <p class="text-muted small mb-2">Completá los datos del servicio o reparación realizado.</p>
+
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading"><span class="spinner"></span> Cargando...</div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="maintenance_type_id">Tipo de mantenimiento *</label>
+          <select id="maintenance_type_id" class="form-control" [class.is-invalid]="!!fieldError('maintenance_type_id')" formControlName="maintenance_type_id">
+            <option value="" disabled>Seleccioná un tipo...</option>
+            @for (t of typeOptions(); track t.id) {
+              <option [value]="t.id">{{ t.name }}</option>
+            }
+          </select>
+          @if (fieldError('maintenance_type_id'); as msg) { <span class="form-error">{{ msg }}</span> }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="date">Fecha *</label>
+          <input id="date" type="date" class="form-control" [class.is-invalid]="!!fieldError('date')" formControlName="date" />
+          @if (fieldError('date'); as msg) { <span class="form-error">{{ msg }}</span> }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="kilometers">Kilometraje *</label>
+          <input id="kilometers" type="number" class="form-control" [class.is-invalid]="!!fieldError('kilometers')" formControlName="kilometers" placeholder="50000" />
+          @if (fieldError('kilometers'); as msg) { <span class="form-error">{{ msg }}</span> }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cost">Costo ($) *</label>
+          <input id="cost" type="number" class="form-control" [class.is-invalid]="!!fieldError('cost')" formControlName="cost" placeholder="35000" />
+          @if (fieldError('cost'); as msg) { <span class="form-error">{{ msg }}</span> }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="workshop">Taller</label>
+          <input id="workshop" type="text" class="form-control" formControlName="workshop" placeholder="Taller El Motor" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="description">Descripción</label>
+        <textarea id="description" rows="2" class="form-control" formControlName="description" placeholder="Cambio de aceite sintético..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="notes">Observaciones</label>
+        <textarea id="notes" rows="2" class="form-control" formControlName="notes" placeholder="Detalles adicionales"></textarea>
+      </div>
+
+      <div class="flex mt-2">
+        <button class="btn btn-primary" type="submit" [disabled]="saving()">
+          @if (saving()) { <span class="spinner"></span> Guardando... } @else { {{ isEdit() ? 'Guardar cambios' : 'Registrar mantenimiento' }} }
+        </button>
+        <a class="btn btn-outline" [routerLink]="['/vehicles', vehicleId, 'maintenances']">Cancelar</a>
+      </div>
+    </form>
+  }
+</div>

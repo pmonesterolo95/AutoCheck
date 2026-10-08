@@ -1,0 +1,31 @@
+<div class="auth-page">
+  <section class="brand-panel">
+    <div class="brand">
+      <app-logo [size]="54" />
+      <span class="name">AutoCheck</span>
+    </div>
+    <h2>Gestión inteligente de mantenimiento vehicular</h2>
+    <p>
+      Registrá tus vehículos, mantenimientos, gastos y documentación. Recibí alertas
+      de vencimientos y consultá recomendaciones con AutoCheck IA.
+    </p>
+    <ul class="features">
+      <li>✔ Control de mantenimiento por kilometraje y fecha</li>
+      <li>✔ Gastos y estadísticas con gráficos</li>
+      <li>✔ Recordatorios y vencimientos automáticos</li>
+      <li>✔ Asistente inteligente AutoCheck IA</li>
+    </ul>
+    <p class="quote">"Por fin olvidé cuándo toca el service: AutoCheck me avisa."</p>
+  </section>
+
+  <section class="form-panel">
+    <a class="back-link" routerLink="/">← Volver al inicio</a>
+    <div class="form-card">
+      <h1>{{ title }}</h1>
+      @if (subtitle) {
+        <p class="subtitle">{{ subtitle }}</p>
+      }
+      <ng-content></ng-content>
+    </div>
+  </section>
+</div>

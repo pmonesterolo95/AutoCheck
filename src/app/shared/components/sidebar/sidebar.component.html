@@ -1,0 +1,46 @@
+<nav class="sidebar" [class.open]="open" [class.collapsed]="collapsed">
+  <button class="collapse-btn" type="button" [attr.aria-label]="collapsed ? 'Expandir menú' : 'Colapsar menú'" (click)="toggleCollapse.emit()">
+    {{ collapsed ? '»' : '«' }}
+  </button>
+
+  <div class="brand">
+    <app-logo [size]="38" />
+    <div>
+      <strong>AutoCheck</strong>
+      <small>Mantenimiento vehicular</small>
+    </div>
+  </div>
+
+  <ul class="nav">
+    @for (item of items; track item.link) {
+      <li>
+        <a [routerLink]="item.link" [routerLinkActiveOptions]="{ exact: item.exact === true }"
+           routerLinkActive="active" (click)="close.emit()" [title]="collapsed ? item.label : undefined">
+          <span class="icon">{{ item.icon }}</span>
+          <span class="label">{{ item.label }}</span>
+        </a>
+      </li>
+    }
+
+    @if (isAdmin()) {
+      <li class="section">Administración</li>
+      @for (item of adminItems; track item.link) {
+        <li>
+          <a [routerLink]="item.link" routerLinkActive="active" (click)="close.emit()" [title]="collapsed ? item.label : undefined">
+            <span class="icon">{{ item.icon }}</span>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </li>
+      }
+    }
+  </ul>
+
+  <div class="footer">
+    <small>AutoCheck v1.0</small>
+    <small>Gestión inteligente de mantenimiento</small>
+  </div>
+</nav>
+
+@if (open) {
+  <div class="backdrop" (click)="close.emit()"></div>
+}

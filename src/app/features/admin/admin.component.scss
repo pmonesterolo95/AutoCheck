@@ -1,0 +1,65 @@
+.tabs {
+  display: flex;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+}
+.tab {
+  background: none;
+  border: none;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  font-family: inherit;
+  border-radius: 8px 8px 0 0;
+  transition: color 0.15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.stat-card {
+  display: grid;
+  gap: 0.25rem;
+}
+.stat-card span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stat-card strong {
+  font-size: 1.5rem;
+}
+.stat-card small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.type-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1rem;
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.type-card > .small.text-muted {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+  flex: 1;
+}
+
+.vtype-icon {
+  font-size: 1.1rem;
+  margin-right: 0.35rem;
+}

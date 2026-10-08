@@ -1,0 +1,262 @@
+<h2>Panel de administración</h2>
+<p class="text-muted small mb-2">Gestión general de la aplicación.</p>
+
+<div class="tabs">
+  <button class="tab" [class.active]="tab() === 'stats'" type="button" (click)="setTab('stats')">📊 Estadísticas</button>
+  <button class="tab" [class.active]="tab() === 'users'" type="button" (click)="setTab('users')">👥 Usuarios</button>
+  <button class="tab" [class.active]="tab() === 'vehicles'" type="button" (click)="setTab('vehicles')">🚗 Vehículos</button>
+  <button class="tab" [class.active]="tab() === 'types'" type="button" (click)="setTab('types')">🔧 Tipos de mantenimiento</button>
+  <button class="tab" [class.active]="tab() === 'vehicleTypes'" type="button" (click)="setTab('vehicleTypes')">🚙 Tipos de vehículo</button>
+</div>
+
+<!-- ============ ESTADÍSTICAS ============ -->
+@if (tab() === 'stats') {
+  @if (loadingStats()) {
+    <div class="page-loading"><span class="spinner"></span> Calculando estadísticas...</div>
+  } @else if (stats(); as s) {
+    <div class="grid grid-4 mt-2">
+      <div class="card stat-card">
+        <span>Usuarios registrados</span>
+        <strong>{{ s.totalUsers }}</strong>
+        <small>ADMIN: {{ userCountByRole().admins }} · USER: {{ userCountByRole().users }}</small>
+      </div>
+      <div class="card stat-card">
+        <span>Vehículos registrados</span>
+        <strong>{{ s.totalVehicles }}</strong>
+      </div>
+      <div class="card stat-card">
+        <span>Mantenimientos</span>
+        <strong>{{ s.totalMaintenances }}</strong>
+      </div>
+      <div class="card stat-card">
+        <span>Gasto total (mes)</span>
+        <strong>{{ s.monthExpenses | currency: 'ARS' : 'symbol' : '1.0-0' }}</strong>
+        <small>Total histórico: {{ s.totalExpenses | currency: 'ARS' : 'symbol' : '1.0-0' }}</small>
+      </div>
+    </div>
+
+    <div class="card mt-2">
+      <h4 class="card-title">Usuarios recientes</h4>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Fecha de alta</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of users().slice(0, 5); track u.id) {
+              <tr>
+                <td class="bold">{{ u.full_name || '—' }}</td>
+                <td>{{ u.email }}</td>
+                <td>
+                  <span class="badge" [class.badge-success]="u.role === 'ADMIN'" [class.badge-muted]="u.role === 'USER'">
+                    {{ u.role === 'ADMIN' ? 'Administrador' : 'Usuario' }}
+                  </span>
+                </td>
+                <td>{{ u.created_at | date: 'dd/MM/yyyy' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+}
+
+<!-- ============ USUARIOS ============ -->
+@if (tab() === 'users') {
+  <div class="card table-responsive mt-2">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Vehículos</th>
+          <th>Gasto total</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of users(); track u.id) {
+          <tr>
+            <td class="bold">{{ u.full_name || '—' }}</td>
+            <td>{{ u.email }}</td>
+            <td>
+              <span class="badge" [class.badge-success]="u.role === 'ADMIN'" [class.badge-muted]="u.role === 'USER'">
+                {{ u.role === 'ADMIN' ? 'Administrador' : 'Usuario' }}
+              </span>
+            </td>
+            <td>{{ u.vehicle_count }}</td>
+            <td>{{ u.expense_total | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
+            <td>
+              <button class="btn btn-outline btn-sm" type="button" (click)="toggleRole(u)">
+                {{ u.role === 'ADMIN' ? 'Quitar admin' : 'Hacer admin' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<!-- ============ VEHÍCULOS ============ -->
+@if (tab() === 'vehicles') {
+  <div class="card table-responsive mt-2">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Vehículo</th>
+          <th>Tipo</th>
+          <th>Patente</th>
+          <th>Año</th>
+          <th>KM</th>
+          <th>Combustible</th>
+          <th>Propietario</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (v of vehicles(); track v.id) {
+          <tr>
+            <td class="bold">{{ v.brand }} {{ v.model }}</td>
+            <td>{{ vehicleTypeLabel(v.vehicle_type_id) }}</td>
+            <td><span class="badge badge-muted">{{ v.license_plate }}</span></td>
+            <td>{{ v.year }}</td>
+            <td>{{ v.current_km.toLocaleString('es-AR') }} km</td>
+            <td>{{ v.fuel_type }}</td>
+            <td>{{ ownerOf(v.user_id) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<!-- ============ TIPOS DE MANTENIMIENTO ============ -->
+@if (tab() === 'types') {
+  <div class="flex-between mt-2">
+    <p class="text-muted small">Catálogo de tipos de mantenimiento disponibles para todos los usuarios.</p>
+    <button class="btn btn-primary" type="button" (click)="openNewType()">+ Nuevo tipo</button>
+  </div>
+
+  <div class="card mt-2">
+    <div class="grid grid-3">
+      @for (t of types(); track t.id) {
+        <div class="type-card">
+          <div class="flex-between">
+            <strong>{{ t.name }}</strong>
+            <div class="flex">
+              <button class="btn btn-ghost btn-sm" type="button" (click)="openEditType(t.id, t.name)">✎</button>
+              <button class="btn btn-ghost btn-sm text-danger" type="button" (click)="removeType(t.id, t.name)">🗑</button>
+            </div>
+          </div>
+          <p class="small text-muted">{{ t.description || 'Sin descripción' }}</p>
+          <div class="small">
+            @if (t.recommended_km) { <span class="badge badge-muted">{{ t.recommended_km.toLocaleString('es-AR') }} km</span> }
+            @if (t.recommended_months) { <span class="badge badge-muted">{{ t.recommended_months }} meses</span> }
+            @if (!t.recommended_km && !t.recommended_months) { <span class="badge badge-muted">Sin intervalo</span> }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ============ TIPOS DE VEHÍCULO ============ -->
+@if (tab() === 'vehicleTypes') {
+  <div class="flex-between mt-2">
+    <p class="text-muted small">Catálogo de tipos de vehículo/automotor disponibles para todos los usuarios (autos, motos, camiones, maquinaria, etc.).</p>
+    <button class="btn btn-primary" type="button" (click)="openNewVType()">+ Nuevo tipo</button>
+  </div>
+
+  <div class="card mt-2">
+    <div class="grid grid-3">
+      @for (t of vehicleTypes(); track t.id) {
+        <div class="type-card">
+          <div class="flex-between">
+            <strong><span class="vtype-icon">{{ t.icon }}</span> {{ t.name }}</strong>
+            <div class="flex">
+              <button class="btn btn-ghost btn-sm" type="button" (click)="openEditVType(t.id, t.name)">✎</button>
+              <button class="btn btn-ghost btn-sm text-danger" type="button" (click)="removeVType(t.id, t.name)">🗑</button>
+            </div>
+          </div>
+          <p class="small text-muted">{{ t.description || 'Sin descripción' }}</p>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Modal tipo de vehículo -->
+<app-modal [open]="showVTypeModal()" [title]="editingVType() ? 'Editar tipo de vehículo' : 'Nuevo tipo de vehículo'" (close)="showVTypeModal.set(false)">
+  @if (vTypeError()) {
+    <div class="alert alert-error">{{ vTypeError() }}</div>
+  }
+  <form [formGroup]="vTypeForm" (ngSubmit)="saveVType()">
+    <div class="form-group">
+      <label class="form-label" for="vtype_name">Nombre *</label>
+      <input id="vtype_name" type="text" class="form-control" formControlName="name" placeholder="Camión" />
+      @if (vTypeForm.get('name')?.invalid && vTypeForm.get('name')?.touched) {
+        <span class="form-error">El nombre es obligatorio.</span>
+      }
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="vtype_icon">Ícono (emoji) *</label>
+      <input id="vtype_icon" type="text" class="form-control" formControlName="icon" placeholder="🚚" maxlength="4" />
+      @if (vTypeForm.get('icon')?.invalid && vTypeForm.get('icon')?.touched) {
+        <span class="form-error">Ingresá un emoji (ej. 🚚).</span>
+      }
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="vtype_desc">Descripción</label>
+      <input id="vtype_desc" type="text" class="form-control" formControlName="description" />
+    </div>
+    <div class="flex mt-2">
+      <button class="btn btn-primary" type="submit" [disabled]="savingVType()">
+        @if (savingVType()) { <span class="spinner"></span> Guardando... } @else { {{ editingVType() ? 'Guardar cambios' : 'Crear tipo' }} }
+      </button>
+      <button class="btn btn-outline" type="button" (click)="showVTypeModal.set(false)">Cancelar</button>
+    </div>
+  </form>
+</app-modal>
+
+<!-- Modal tipo de mantenimiento -->
+<app-modal [open]="showTypeModal()" [title]="editingType() ? 'Editar tipo de mantenimiento' : 'Nuevo tipo de mantenimiento'" (close)="showTypeModal.set(false)">
+  @if (typeError()) {
+    <div class="alert alert-error">{{ typeError() }}</div>
+  }
+  <form [formGroup]="typeForm" (ngSubmit)="saveType()">
+    <div class="form-group">
+      <label class="form-label" for="type_name">Nombre *</label>
+      <input id="type_name" type="text" class="form-control" formControlName="name" placeholder="Cambio de aceite" />
+      @if (typeForm.get('name')?.invalid && typeForm.get('name')?.touched) {
+        <span class="form-error">El nombre es obligatorio.</span>
+      }
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="type_desc">Descripción</label>
+      <input id="type_desc" type="text" class="form-control" formControlName="description" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="type_km">Intervalo (km)</label>
+        <input id="type_km" type="number" class="form-control" formControlName="recommended_km" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="type_months">Intervalo (meses)</label>
+        <input id="type_months" type="number" class="form-control" formControlName="recommended_months" />
+      </div>
+    </div>
+    <div class="flex mt-2">
+      <button class="btn btn-primary" type="submit" [disabled]="savingType()">
+        @if (savingType()) { <span class="spinner"></span> Guardando... } @else { {{ editingType() ? 'Guardar cambios' : 'Crear tipo' }} }
+      </button>
+      <button class="btn btn-outline" type="button" (click)="showTypeModal.set(false)">Cancelar</button>
+    </div>
+  </form>
+</app-modal>

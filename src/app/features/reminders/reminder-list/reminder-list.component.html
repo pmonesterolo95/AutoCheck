@@ -1,0 +1,122 @@
+<div class="flex-between wrap">
+  <div>
+    <h2>Recordatorios</h2>
+    <p class="text-muted small mb-2">Creá avisos por fecha o por kilometraje.</p>
+  </div>
+  <div class="flex">
+    @if (vehicleId) {
+      <a class="btn btn-outline" [routerLink]="['/vehicles', vehicleId]">← Vehículo</a>
+    }
+    <button class="btn btn-primary" type="button" (click)="openNew()">+ Nuevo recordatorio</button>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="page-loading"><span class="spinner"></span> Cargando recordatorios...</div>
+} @else if (list().length === 0) {
+  <div class="card empty-state">
+    <div class="icon">⏰</div>
+    <h3>No hay recordatorios</h3>
+    <p>Creá recordatorios basados en una fecha o en el kilometraje de tu vehículo.</p>
+  </div>
+} @else {
+  <div class="card table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Título</th>
+          @if (!vehicleId) { <th>Vehículo</th> }
+          <th>Fecha</th>
+          <th>Kilometraje</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of list(); track r.id) {
+          <tr>
+            <td class="bold">
+              {{ r.title }}
+              @if (effectiveStatus(r) === 'vencido' && isDueSoon(r) === false) {
+                <span class="badge badge-danger">Vencido</span>
+              } @else if (effectiveStatus(r) !== 'vencido' && isDueSoon(r)) {
+                <span class="badge badge-warning">Próximo</span>
+              }
+            </td>
+            @if (!vehicleId) { <td>{{ vehicleLabel(r.vehicle_id) }}</td> }
+            <td>{{ r.reminder_date ? (r.reminder_date | date: 'dd/MM/yyyy') : '—' }}</td>
+            <td>{{ r.reminder_km != null ? r.reminder_km.toLocaleString('es-AR') + ' km' : '—' }}</td>
+            <td>
+              @if (effectiveStatus(r) === 'vencido') {
+                <span class="badge badge-danger">Vencido</span>
+              } @else if (effectiveStatus(r) === 'completado') {
+                <span class="badge badge-success">Completado</span>
+              } @else {
+                <span class="badge badge-warning">Pendiente</span>
+              }
+            </td>
+            <td class="text-right">
+              <button class="btn btn-ghost btn-sm" type="button" (click)="toggleComplete(r)">
+                {{ r.status === 'completado' ? '↩' : '✓' }}
+              </button>
+              <button class="btn btn-ghost btn-sm" type="button" (click)="openEdit(r)">✎</button>
+              <button class="btn btn-ghost btn-sm text-danger" type="button" (click)="remove(r)">🗑</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<!-- Modal -->
+<app-modal [open]="showModal()" [title]="editing() ? 'Editar recordatorio' : 'Nuevo recordatorio'" (close)="closeModal()">
+  @if (formError()) {
+    <div class="alert alert-error">{{ formError() }}</div>
+  }
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label class="form-label" for="rem_vehicle">Vehículo *</label>
+      <select id="rem_vehicle" class="form-control" formControlName="vehicle_id">
+        @for (v of vehiclesService.vehicles(); track v.id) {
+          <option [value]="v.id">{{ v.brand }} {{ v.model }} ({{ v.license_plate || v.unit_number }})</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="rem_title">Título *</label>
+      <input id="rem_title" type="text" class="form-control" [class.is-invalid]="!!(form.get('title')?.invalid && form.get('title')?.touched)" formControlName="title" placeholder="Cambiar aceite" />
+      @if (form.get('title')?.invalid && form.get('title')?.touched) {
+        <span class="form-error">El título es obligatorio.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="rem_desc">Descripción</label>
+      <input id="rem_desc" type="text" class="form-control" formControlName="description" placeholder="Detalles del recordatorio" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="rem_date">Fecha (opcional)</label>
+        <input id="rem_date" type="date" class="form-control" formControlName="reminder_date" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="rem_km">Kilometraje (opcional)</label>
+        <input id="rem_km" type="number" class="form-control" formControlName="reminder_km" placeholder="60000" />
+      </div>
+    </div>
+
+    @if (form.errors?.['dateOrKm'] && form.touched) {
+      <div class="alert alert-warning">Completá al menos una fecha o un kilometraje.</div>
+    }
+
+    <div class="flex mt-2">
+      <button class="btn btn-primary" type="submit" [disabled]="saving()">
+        @if (saving()) { <span class="spinner"></span> Guardando... } @else { {{ editing() ? 'Guardar cambios' : 'Crear recordatorio' }} }
+      </button>
+      <button class="btn btn-outline" type="button" (click)="closeModal()">Cancelar</button>
+    </div>
+  </form>
+</app-modal>

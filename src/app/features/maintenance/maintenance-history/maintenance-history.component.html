@@ -1,0 +1,70 @@
+<div class="flex-between wrap">
+  <div>
+    <h2>
+      @if (vehicleId) {
+        Historial de mantenimientos
+      } @else {
+        Todos los mantenimientos
+      }
+    </h2>
+    <p class="text-muted small mb-2">
+      @if (vehicleId) {
+        Registros de este vehículo.
+      } @else {
+        Historial completo de tus vehículos.
+      }
+    </p>
+  </div>
+
+  <div class="flex">
+    @if (!vehicleId) {
+      <button class="btn btn-primary" type="button" (click)="goCreate()">+ Registrar mantenimiento</button>
+      <a class="btn btn-outline" routerLink="/vehicles">Mis vehículos</a>
+    } @else {
+      <a class="btn btn-outline" [routerLink]="['/vehicles', vehicleId]">← Vehículo</a>
+      <a class="btn btn-primary" [routerLink]="['/vehicles', vehicleId, 'maintenance', 'new']">+ Registrar mantenimiento</a>
+    }
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="page-loading"><span class="spinner"></span> Cargando mantenimientos...</div>
+} @else if (list().length === 0) {
+  <div class="card empty-state">
+    <div class="icon">🔧</div>
+    <h3>No hay mantenimientos registrados</h3>
+    <p>Registrá el primer mantenimiento de este vehículo.</p>
+  </div>
+} @else {
+  <div class="card table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Fecha</th>
+          <th>Kilómetros</th>
+          <th>Costo</th>
+          <th>Taller</th>
+          @if (!vehicleId) { <th>Vehículo</th> }
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of list(); track m.id) {
+          <tr>
+            <td class="bold">{{ m.maintenance_type?.name ?? 'Mantenimiento' }}</td>
+            <td>{{ m.date | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ m.kilometers.toLocaleString('es-AR') }} km</td>
+            <td>{{ m.cost | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
+            <td>{{ m.workshop || '—' }}</td>
+            @if (!vehicleId) { <td>{{ vehicleLabel(m.vehicle_id) }}</td> }
+            <td class="text-right">
+              <a class="btn btn-ghost btn-sm" [routerLink]="['/vehicles', m.vehicle_id, 'maintenance', m.id, 'edit']">✎</a>
+              <button class="btn btn-ghost btn-sm text-danger" type="button" [disabled]="deleting() === m.id" (click)="remove(m.id)">🗑</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

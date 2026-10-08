@@ -1,0 +1,27 @@
+.profile-grid {
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.info-list {
+  display: grid;
+  gap: 1rem;
+}
+.info-list div {
+  display: grid;
+  gap: 0.2rem;
+}
+.info-list span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.info-list strong {
+  font-size: 0.98rem;
+}

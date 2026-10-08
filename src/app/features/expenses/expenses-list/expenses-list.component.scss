@@ -1,0 +1,23 @@
+.stat-card {
+  display: grid;
+  gap: 0.3rem;
+}
+.stat-card span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stat-card strong {
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.charts-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 900px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}

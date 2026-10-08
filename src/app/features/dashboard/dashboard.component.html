@@ -1,0 +1,133 @@
+@if (!ready()) {
+  <div class="page-loading"><span class="spinner"></span> Cargando dashboard...</div>
+} @else {
+  <div class="greeting">
+    <h2>¡Hola, {{ firstName() }}! 👋</h2>
+    <p class="text-muted small">Resumen del estado de tus vehículos.</p>
+  </div>
+
+  <!-- Tarjetas resumen -->
+  <div class="grid grid-4">
+    <a class="card summary" routerLink="/vehicles">
+      <span class="summary-icon">🚗</span>
+      <div>
+        <strong>{{ vehicles().length }}</strong>
+        <span>Vehículos</span>
+      </div>
+    </a>
+    <a class="card summary" routerLink="/maintenances">
+      <span class="summary-icon">🔧</span>
+      <div>
+        <strong>{{ totalPending() }}</strong>
+        <span>Mantenimientos pendientes</span>
+      </div>
+    </a>
+    <a class="card summary" routerLink="/documents">
+      <span class="summary-icon">📄</span>
+      <div>
+        <strong>{{ vencimientosProximos() }}</strong>
+        <span>Vencimientos próximos</span>
+      </div>
+    </a>
+    <a class="card summary" routerLink="/expenses">
+      <span class="summary-icon">💰</span>
+      <div>
+        <strong>{{ monthExpenses() | currency: 'ARS' : 'symbol' : '1.0-0' }}</strong>
+        <span>Gastos del mes</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="grid dashboard-grid mt-2">
+    <!-- Estado de vehículos -->
+    <div class="card">
+      <h4 class="card-title">Estado general de tus vehículos</h4>
+      @if (vehicles().length === 0) {
+        <div class="empty-state">
+          <p>No tenés vehículos registrados. <a routerLink="/vehicles/new">Registrá uno</a>.</p>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Vehículo</th>
+                <th>KM</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (v of vehicles(); track v.id) {
+                <tr>
+                  <td class="bold">{{ v.brand }} {{ v.model }}
+                    <div class="small text-muted">{{ v.license_plate || (v.unit_number ? 'N° ' + v.unit_number : 'Sin dominio') }}</div>
+                  </td>
+                  <td>{{ v.current_km.toLocaleString('es-AR') }} km</td>
+                  <td>
+                    <app-status-badge [status]="vehicleStatus(v).status" />
+                  </td>
+                  <td>
+                    <a class="btn btn-ghost btn-sm" [routerLink]="['/vehicles', v.id]">Ver</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <!-- Alertas -->
+    <div class="card">
+      <h4 class="card-title">Alertas importantes</h4>
+      @if (alerts().length === 0) {
+        <p class="text-muted small">Todo en orden. No hay alertas activas. 🎉</p>
+      } @else {
+        <ul class="alert-list">
+          @for (a of alerts(); track a.message) {
+            <li>
+              <span class="alert-icon">{{ a.icon }}</span>
+              <span>{{ a.message }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+
+  <!-- Últimos mantenimientos -->
+  <div class="card mt-2">
+    <h4 class="card-title">Últimos mantenimientos
+      <a class="btn btn-ghost btn-sm" routerLink="/maintenances">Ver todos</a>
+    </h4>
+    @if (lastMaintenances().length === 0) {
+      <p class="text-muted small">Aún no registraste mantenimientos.</p>
+    } @else {
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Vehículo</th>
+              <th>Tipo</th>
+              <th>Fecha</th>
+              <th>Kilómetros</th>
+              <th class="text-right">Costo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of lastMaintenances(); track m.id) {
+              <tr>
+                <td>{{ vehicleOf(m.vehicle_id) ? vehicleOf(m.vehicle_id)!.brand + ' ' + vehicleOf(m.vehicle_id)!.model : '—' }}</td>
+                <td>{{ m.maintenance_type?.name ?? 'Mantenimiento' }}</td>
+                <td>{{ m.date | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ m.kilometers.toLocaleString('es-AR') }} km</td>
+                <td class="text-right bold">{{ m.cost | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}

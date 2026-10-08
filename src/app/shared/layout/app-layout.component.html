@@ -1,0 +1,14 @@
+<div class="layout">
+  <a class="skip-link" href="#main">Saltar al contenido principal</a>
+  <app-sidebar [open]="sidebarOpen()" [collapsed]="sidebarCollapsed()" (close)="sidebarOpen.set(false)" (toggleCollapse)="toggleCollapse()" />
+
+  <div class="main">
+    <app-header (toggleSidebar)="toggleSidebar()" />
+    <main id="main" class="content">
+      <router-outlet />
+    </main>
+  </div>
+
+  <app-confirm-host />
+  <app-floating-chat />
+</div>

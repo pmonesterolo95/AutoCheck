@@ -1,0 +1,65 @@
+<div class="flex-between wrap">
+  <div>
+    <h2>Mis vehículos</h2>
+    <p class="text-muted small mb-2">Administrá tus vehículos, automotores o unidades de flota.</p>
+  </div>
+  <a class="btn btn-primary" routerLink="/vehicles/new">+ Nuevo vehículo</a>
+</div>
+
+@if (vehiclesService.loading()) {
+  <div class="page-loading">
+    <span class="spinner"></span> Cargando vehículos...
+  </div>
+} @else if (vehiclesService.vehicles().length === 0) {
+  <div class="card empty-state">
+    <div class="icon">🚗</div>
+    <h3>No tenés vehículos registrados</h3>
+    <p>Registrá tu primer vehículo, automotor o unidad para controlar sus mantenimientos.</p>
+    <a class="btn btn-primary mt-2" routerLink="/vehicles/new">Registrar vehículo</a>
+  </div>
+} @else {
+  <div class="flex wrap filters">
+    <select class="form-control" [value]="typeFilter()" (change)="onTypeFilter($event)" aria-label="Filtrar por tipo">
+      <option value="">Todo tipo de vehículo</option>
+      @for (t of vehicleTypes.types(); track t.id) {
+        <option [value]="t.id">{{ t.icon }} {{ t.name }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="grid grid-3">
+    @for (vehicle of filteredVehicles(); track vehicle.id) {
+      <div class="card vehicle-card">
+        <div class="img-wrap" [class.no-img]="!vehicle.image_url">
+          @if (vehicle.image_url) {
+            <img [src]="vehicle.image_url" alt="{{ vehicle.brand }} {{ vehicle.model }}" />
+          } @else {
+            <span class="img-placeholder">{{ typeIcon(vehicle.vehicle_type_id) }}</span>
+          }
+        </div>
+
+        <div class="body">
+          <div class="flex-between">
+            <h3 class="mb-0">{{ vehicle.brand }} {{ vehicle.model }}</h3>
+            <span class="badge badge-info">{{ vehicle.license_plate || (vehicle.unit_number ? 'N° ' + vehicle.unit_number : 'S/D') }}</span>
+          </div>
+          <p class="text-muted small mb-1">
+            {{ typeName(vehicle.vehicle_type_id) }}
+            @if (vehicle.unit_number) { · {{ vehicle.unit_number }} }
+          </p>
+          <p class="text-muted small mb-2">
+            {{ vehicle.year }} · {{ vehicle.fuel_type }} · {{ vehicle.current_km.toLocaleString('es-AR') }} km
+          </p>
+
+          <p class="hint small">{{ maintenanceHint(vehicle.current_km) }}</p>
+
+          <div class="actions">
+            <a class="btn btn-outline btn-sm" [routerLink]="['/vehicles', vehicle.id]">Ver detalle</a>
+            <a class="btn btn-ghost btn-sm" [routerLink]="['/vehicles', vehicle.id, 'edit']">✎</a>
+            <button class="btn btn-ghost btn-sm danger" type="button" (click)="deleteVehicle(vehicle.id, vehicle.license_plate || vehicle.unit_number || vehicle.brand)">✕</button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}

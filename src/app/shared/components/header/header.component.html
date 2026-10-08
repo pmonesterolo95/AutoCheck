@@ -1,0 +1,74 @@
+<header class="header">
+  <button class="hamburger" type="button" (click)="toggleSidebar.emit()" aria-label="Abrir menú">☰</button>
+
+  <h1 class="page-title">{{ pageTitle() }}</h1>
+
+  <div class="actions">
+    <!-- Notificaciones -->
+    <div class="dropdown-wrap">
+      <button class="icon-btn" type="button" (click)="toggleNotifications($event)" aria-label="Notificaciones">
+        🔔
+        @if (notifications.unreadCount() > 0) {
+          <span class="dot">{{ notifications.unreadCount() > 9 ? '9+' : notifications.unreadCount() }}</span>
+        }
+      </button>
+
+      @if (openNotifications()) {
+        <div class="dropdown notif-dropdown" (click)="$event.stopPropagation()">
+          <div class="dropdown-head">
+            <strong>Notificaciones</strong>
+            @if (notifications.unreadCount() > 0) {
+              <button class="btn btn-ghost btn-sm" type="button" (click)="notifications.markAllAsRead()">
+                Marcar todas
+              </button>
+            }
+          </div>
+
+          @if (notifications.notifications().length === 0) {
+            <div class="dropdown-empty">No tenés notificaciones.</div>
+          } @else {
+            <ul class="notif-list">
+              @for (n of notifications.notifications(); track n.id) {
+                <li [class.unread]="!n.is_read" (click)="readNotification(n.id)">
+                  <strong>{{ n.title }}</strong>
+                  <p>{{ n.message }}</p>
+                  <small>{{ n.created_at | date: 'dd/MM/yyyy HH:mm' }}</small>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Usuario -->
+    <div class="dropdown-wrap">
+      <button class="user-btn" type="button" (click)="toggleUserMenu($event)">
+        <span class="avatar">{{ (profile()?.full_name || profile()?.email || 'U') | slice: 0 : 1 | uppercase }}</span>
+        <span class="user-info hide-mobile">
+          <strong>{{ profile()?.full_name || 'Usuario' }}</strong>
+          <small>{{ profile()?.role === 'ADMIN' ? 'Administrador' : 'Usuario' }}</small>
+        </span>
+        <span class="chevron">▾</span>
+      </button>
+
+      @if (openUserMenu()) {
+        <div class="dropdown user-dropdown" (click)="$event.stopPropagation()">
+          <div class="dropdown-head">
+            <div>
+              <strong>{{ profile()?.full_name || 'Usuario' }}</strong>
+              <small class="text-muted block">{{ profile()?.email }}</small>
+            </div>
+          </div>
+          <a class="dropdown-item" routerLink="/profile" (click)="closeMenus()">👤 Mi perfil</a>
+          @if (isAdmin()) {
+            <a class="dropdown-item" routerLink="/admin" (click)="closeMenus()">🛠️ Panel de administración</a>
+          }
+          <button class="dropdown-item danger" type="button" (click)="auth.signOut()">
+            ⎋ Cerrar sesión
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</header>

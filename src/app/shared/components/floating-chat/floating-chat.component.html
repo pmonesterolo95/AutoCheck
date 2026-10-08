@@ -1,0 +1,33 @@
+@if (open()) {
+  <div class="chat-panel" role="dialog" aria-label="Chat de AutoCheck IA">
+    <div class="panel-head">
+      <app-logo [size]="30" />
+      <div class="head-text">
+        <strong>AutoCheck IA</strong>
+        <small>Asistente inteligente de mantenimiento</small>
+      </div>
+      <button class="head-close" type="button" (click)="close()" aria-label="Cerrar chat">✕</button>
+    </div>
+
+    <div class="panel-body">
+      <app-ai-chat />
+    </div>
+  </div>
+}
+
+<button
+  #fabBtn
+  class="fab"
+  type="button"
+  [attr.aria-expanded]="open()"
+  aria-haspopup="dialog"
+  [attr.aria-label]="open() ? 'Cerrar chat de AutoCheck IA' : 'Abrir chat de AutoCheck IA'"
+  [class.is-hidden]="onAiPage()"
+  (click)="toggle()"
+>
+  <span class="fab-icon" [class.rotate]="open()">🤖</span>
+  <span class="fab-close" [class.show]="open()">✕</span>
+  @if (!open() && !openedOnce()) {
+    <span class="fab-ping"></span>
+  }
+</button>

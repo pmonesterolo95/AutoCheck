@@ -1,0 +1,96 @@
+<div class="card">
+  <a class="btn btn-ghost btn-sm back" routerLink="/vehicles">← Volver a mis vehículos</a>
+
+  @if (loading()) {
+    <div class="page-loading"><span class="spinner"></span> Cargando...</div>
+  } @else {
+    <h2>{{ isEdit() ? 'Editar vehículo' : 'Registrar vehículo' }}</h2>
+    <p class="text-muted small mb-2">Completá los datos de tu vehículo.</p>
+
+    @if (error()) {
+      <div class="alert alert-error">{{ error() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="brand">Marca *</label>
+          <input id="brand" type="text" class="form-control" [class.is-invalid]="!!fieldError('brand')" formControlName="brand" placeholder="Toyota" />
+          @if (fieldError('brand'); as msg) { <span class="form-error">{{ msg }}</span> }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="model">Modelo *</label>
+          <input id="model" type="text" class="form-control" [class.is-invalid]="!!fieldError('model')" formControlName="model" placeholder="Corolla" />
+          @if (fieldError('model'); as msg) { <span class="form-error">{{ msg }}</span> }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="year">Año *</label>
+          <input id="year" type="number" class="form-control" [class.is-invalid]="!!fieldError('year')" formControlName="year" placeholder="2022" />
+          @if (fieldError('year'); as msg) { <span class="form-error">{{ msg }}</span> }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="license_plate">Patente / dominio</label>
+          <input id="license_plate" type="text" class="form-control" [class.is-invalid]="!!fieldError('license_plate')" formControlName="license_plate" placeholder="ABC123" />
+          @if (fieldError('license_plate'); as msg) { <span class="form-error">{{ msg }}</span> }
+          <span class="form-hint">Opcional: usá el N° de unidad si no tiene patente (ej. maquinaria).</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="current_km">Kilometraje actual *</label>
+          <input id="current_km" type="number" class="form-control" [class.is-invalid]="!!fieldError('current_km')" formControlName="current_km" placeholder="58450" />
+          @if (fieldError('current_km'); as msg) { <span class="form-error">{{ msg }}</span> }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="vehicle_type_id">Tipo de vehículo *</label>
+          <select id="vehicle_type_id" class="form-control" [class.is-invalid]="!!fieldError('vehicle_type_id')" formControlName="vehicle_type_id">
+            <option value="" disabled>Seleccioná un tipo...</option>
+            @for (t of vehicleTypeOptions(); track t.id) {
+              <option [value]="t.id">{{ t.icon }} {{ t.name }}</option>
+            }
+          </select>
+          @if (fieldError('vehicle_type_id'); as msg) { <span class="form-error">{{ msg }}</span> }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="unit_number">N° de unidad / interno</label>
+          <input id="unit_number" type="text" class="form-control" [class.is-invalid]="!!fieldError('unit_number')" formControlName="unit_number" placeholder="U-001" />
+          @if (fieldError('unit_number'); as msg) { <span class="form-error">{{ msg }}</span> }
+          <span class="form-hint">Identificador interno para flotas (opcional).</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="fuel_type">Combustible *</label>
+          <select id="fuel_type" class="form-control" formControlName="fuel_type">
+            @for (fuel of fuelTypes; track fuel) {
+              <option [value]="fuel">{{ fuel }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="purchase_date">Fecha de compra</label>
+          <input id="purchase_date" type="date" class="form-control" formControlName="purchase_date" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="image">Foto del vehículo</label>
+          <input id="image" type="file" accept="image/*" class="form-control" (change)="onFileSelected($event)" />
+          @if (imageUrl) {
+            <span class="form-hint">Imagen actual guardada. Si elegís otra, se reemplazará.</span>
+          }
+        </div>
+      </div>
+
+      <div class="flex mt-2">
+        <button class="btn btn-primary" type="submit" [disabled]="saving()">
+          @if (saving()) { <span class="spinner"></span> Guardando... } @else { {{ isEdit() ? 'Guardar cambios' : 'Registrar vehículo' }} }
+        </button>
+        <a class="btn btn-outline" routerLink="/vehicles">Cancelar</a>
+      </div>
+    </form>
+  }
+</div>

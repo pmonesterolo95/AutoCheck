@@ -1,0 +1,64 @@
+<div class="chat-layout">
+<div class="chat" #scrollContainer>
+      <div class="hero card">
+        <span class="hero-icon">🤖</span>
+        <div>
+          <h2 class="mb-0">AutoCheck IA</h2>
+          <p class="text-muted small mb-0">Asistente inteligente para el cuidado de tu vehículo.</p>
+        </div>
+      </div>
+
+      @if (showSuggestions()) {
+        <div class="suggestions">
+          <p class="small text-muted mb-0">Preguntas sugeridas:</p>
+          @for (cat of suggestionCategories; track cat.title) {
+            <div class="suggestion-cat">
+              <span class="suggestion-cat-title">{{ cat.title }}</span>
+              <div class="chips">
+                @for (s of cat.items; track s) {
+                  <button class="chip" type="button" (click)="useSuggestion(s)">{{ s }}</button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @for (m of messages(); track m) {
+        <div class="msg-row" [class.user]="m.role === 'user'">
+          <div class="bubble" [class.assistant-bubble]="m.role === 'assistant'" [class.user-bubble]="m.role === 'user'">
+            <span [innerHTML]="format(m.text)"></span>
+          </div>
+        </div>
+      }
+
+      @if (typing()) {
+        <div class="msg-row">
+          <div class="bubble assistant-bubble typing-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="sugg-toggle">
+      <button class="btn btn-sm" type="button" (click)="toggleSuggestions()">
+        {{ showSuggestions() ? '🙈 Ocultar sugerencias' : '💡 Ver preguntas sugeridas' }}
+      </button>
+    </div>
+
+    <div class="compose card">
+    <div class="input-row">
+      <input
+        class="form-control"
+        placeholder="Escribí tu consulta sobre mantenimiento, gastos o vencimientos..."
+        [(ngModel)]="input"
+        (keyup.enter)="send()"
+        [disabled]="typing()"
+      />
+      <button class="btn btn-primary" type="button" [disabled]="typing() || !input().trim()" (click)="send()">
+        Enviar ➤
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,216 @@
+<header class="site-nav">
+  <a class="nav-brand" routerLink="/" aria-label="AutoCheck - inicio">
+    <app-logo [size]="34" />
+    <span class="wordmark">AutoCheck</span>
+  </a>
+
+  <nav class="nav-links" aria-label="Navegación principal">
+    <a href="#features">Funciones</a>
+    <a href="#how">Cómo funciona</a>
+  </nav>
+
+  <div class="nav-cta">
+    <a class="btn btn-ghost btn-sm" routerLink="/auth/login">Ingresar</a>
+    <a class="btn btn-primary btn-sm" routerLink="/auth/register">Crear cuenta</a>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="pill">
+        <span class="pill-dot"></span>
+        Para tu vehículo o tu flota completa
+      </span>
+
+      <h1>
+        El mantenimiento de tus vehículos,
+        <span class="grad">bajo control</span>
+      </h1>
+
+      <p class="lead">
+        Registrá autos, camionetas, motos, camiones y maquinaria en un solo lugar.
+        AutoCheck te avisa cuándo toca el service, controla gastos y vencimientos,
+        y responde con su asistente inteligente.
+      </p>
+
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" routerLink="/auth/register">Empezá gratis</a>
+        <a class="btn btn-outline btn-lg" routerLink="/auth/login">Ingresar</a>
+      </div>
+
+      <ul class="trust" aria-label="Beneficios">
+        <li>Sin tarjeta de crédito</li>
+        <li>Todo tipo de automotores</li>
+        <li>Tus datos seguros y 100% tuyos</li>
+      </ul>
+    </div>
+
+    <div class="hero-media" aria-hidden="true">
+      <div class="app-mock">
+        <div class="mock-bar">
+          <span class="mock-dot"></span>
+          <span class="mock-dot"></span>
+          <span class="mock-dot"></span>
+        </div>
+        <div class="mock-body">
+          <div class="mock-side">
+            <span class="mock-pill active"></span>
+            <span class="mock-pill"></span>
+            <span class="mock-pill"></span>
+            <span class="mock-pill short"></span>
+          </div>
+          <div class="mock-main">
+            <div class="mock-cards">
+              <div class="mock-stat">
+                <span class="mock-ico car"></span>
+                <strong>2</strong>
+                <small>Vehículos</small>
+              </div>
+              <div class="mock-stat">
+                <span class="mock-ico wren"></span>
+                <strong>1</strong>
+                <small>Pendientes</small>
+              </div>
+              <div class="mock-stat">
+                <span class="mock-ico doc"></span>
+                <strong>3</strong>
+                <small>Por vencer</small>
+              </div>
+            </div>
+            <div class="mock-chart">
+              <i style="height:34%"></i>
+              <i style="height:58%"></i>
+              <i style="height:44%"></i>
+              <i style="height:72%"></i>
+              <i style="height:55%"></i>
+              <i style="height:86%"></i>
+            </div>
+            <div class="mock-alert">
+              <span class="mock-ico bell"></span>
+              <p><b>Cambio de aceite</b><small>Recomendado antes de 500 km</small></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="glow glow-a"></div>
+      <div class="glow glow-b"></div>
+    </div>
+  </section>
+
+  <!-- FRANJA DE CONFIANZA -->
+  <section class="stats-band" aria-label="Cifras destacadas">
+    <div class="stat">
+      <strong>1 solo lugar</strong>
+      <span>para todo tu historial</span>
+    </div>
+    <div class="stat">
+      <strong>Alertas automáticas</strong>
+      <span>por kilometraje y fecha</span>
+    </div>
+    <div class="stat">
+      <strong>Asistente IA</strong>
+      <span>recomendaciones a medida</span>
+    </div>
+    <div class="stat">
+      <strong>100% seguro</strong>
+      <span>tus datos protegidos</span>
+    </div>
+  </section>
+
+  <!-- FUNCIONES -->
+  <section class="section" id="features">
+    <div class="section-head">
+      <span class="eyebrow">Funciones</span>
+      <h2>Todo lo que tus vehículos necesitan, simplificado</h2>
+      <p>Olvidate de papeles sueltos y planillas. AutoCheck centraliza cada detalle de tu flota, de un auto a una empresa completa.</p>
+    </div>
+
+    <div class="features">
+      <article class="feature">
+        <span class="f-ico">🚙</span>
+        <h3>Todos tus vehículos</h3>
+        <p>Autos, camionetas, motos, camiones, maquinaria y más, con su tipo, dominio y N° de unidad.</p>
+      </article>
+      <article class="feature">
+        <span class="f-ico">🔧</span>
+        <h3>Mantenimientos</h3>
+        <p>Historial completo de services con detalle de kilometraje y costo, ordenado y consultable.</p>
+      </article>
+      <article class="feature">
+        <span class="f-ico">💰</span>
+        <h3>Gastos y estadísticas</h3>
+        <p>Controlá cuánto gastás al mes y analizá la evolución de los costos con gráficos claros.</p>
+      </article>
+      <article class="feature">
+        <span class="f-ico">📄</span>
+        <h3>Documentación</h3>
+        <p>VTV, seguro, cédula: subí archivos y recibí avisos antes de que venzan.</p>
+      </article>
+      <article class="feature">
+        <span class="f-ico">⏰</span>
+        <h3>Recordatorios</h3>
+        <p>AutoCheck calcula cuándo tocan los services por km o fecha y te avisa con tiempo.</p>
+      </article>
+      <article class="feature">
+        <span class="f-ico">🤖</span>
+        <h3>AutoCheck IA</h3>
+        <p>Un asistente inteligente que responde con base en el historial real de tu vehículo.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <section class="section how" id="how">
+    <div class="section-head">
+      <span class="eyebrow">Cómo funciona</span>
+      <h2>Empezar te lleva menos que un café</h2>
+    </div>
+
+    <div class="steps">
+      <article class="step">
+        <span class="step-num">1</span>
+        <h3>Creá tu cuenta</h3>
+        <p>Con tu email y en menos de un minuto ya estás adentro, sin tarjeta ni complicaciones.</p>
+      </article>
+      <article class="step">
+        <span class="step-num">2</span>
+        <h3>Registrá tu vehículo</h3>
+        <p>Cargá los datos y el kilometraje actual. Si querés, también documentos y próximos vencimientos.</p>
+      </article>
+      <article class="step">
+        <span class="step-num">3</span>
+        <h3>Descansá</h3>
+        <p>AutoCheck calcula los mantenimientos por km o fecha y te avisa cuándo actuar. Vos solo cargás lo que hacés.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-band" id="cta">
+    <div class="cta-inner">
+      <app-logo [size]="46" />
+      <h2>Tomá el control de tus vehículos hoy</h2>
+      <p>Creá tu cuenta gratis y empezá a cuidar tu auto o tu flota de forma inteligente.</p>
+      <div class="cta-buttons">
+        <a class="btn btn-accent btn-lg" routerLink="/auth/register">Crear cuenta gratis</a>
+        <a class="btn btn-ghost btn-lg cta-wire" routerLink="/auth/login">Ya tengo cuenta</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <a class="footer-brand" routerLink="/">
+    <app-logo [size]="26" />
+    <span>AutoCheck</span>
+  </a>
+  <p>Gestión inteligente del mantenimiento de vehículos y flotas.</p>
+  <nav aria-label="Accesos rápidos">
+    <a routerLink="/auth/login">Ingresar</a>
+    <a routerLink="/auth/register">Crear cuenta</a>
+    <a href="#features">Funciones</a>
+  </nav>
+  <small>© 2026 AutoCheck. Hecho con cuidado para cuidar tus vehículos.</small>
+</footer>

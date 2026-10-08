@@ -1,0 +1,55 @@
+<h2>Mi perfil</h2>
+<p class="text-muted small mb-2">Administrá tus datos personales.</p>
+
+@if (profile(); as p) {
+  <div class="grid profile-grid">
+    <div class="card">
+      <h4 class="card-title">Datos personales</h4>
+
+      @if (error()) {
+        <div class="alert alert-error">{{ error() }}</div>
+      }
+      @if (success()) {
+        <div class="alert alert-success">{{ success() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="form-group">
+          <label class="form-label" for="name">Nombre completo</label>
+          <input id="name" type="text" class="form-control" formControlName="full_name" />
+          @if (form.get('full_name')?.invalid && form.get('full_name')?.touched) {
+            <span class="form-error">El nombre es obligatorio (mínimo 3 caracteres).</span>
+          }
+        </div>
+
+        <button class="btn btn-primary" type="submit" [disabled]="saving()">
+          @if (saving()) { <span class="spinner"></span> Guardando... } @else { Guardar cambios }
+        </button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h4 class="card-title">Información de la cuenta</h4>
+
+      <div class="info-list">
+        <div>
+          <span>Email</span>
+          <strong>{{ p.email }}</strong>
+        </div>
+        <div>
+          <span>Rol</span>
+          <strong>
+            <span class="badge" [class.badge-success]="p.role === 'ADMIN'"
+                  [class.badge-info]="p.role === 'USER'">
+              {{ p.role === 'ADMIN' ? 'Administrador' : 'Usuario' }}
+            </span>
+          </strong>
+        </div>
+        <div>
+          <span>Miembro desde</span>
+          <strong>{{ p.created_at | date: 'dd/MM/yyyy' }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,156 @@
+<div class="flex-between wrap">
+  <div>
+    <h2>Gastos</h2>
+    <p class="text-muted small mb-2">
+      @if (vehicleId) { Gastos de este vehículo. } @else { Todos los gastos de tus vehículos. }
+    </p>
+  </div>
+  <div class="flex">
+    @if (vehicleId) {
+      <a class="btn btn-outline" [routerLink]="['/vehicles', vehicleId]">← Vehículo</a>
+    }
+    <button class="btn btn-primary" type="button" (click)="openNew()">+ Registrar gasto</button>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="page-loading"><span class="spinner"></span> Cargando gastos...</div>
+} @else {
+  <div class="grid grid-3">
+    <div class="card stat-card">
+      <span>Gastos del mes</span>
+      <strong>{{ monthTotal() | currency: 'ARS' : 'symbol' : '1.0-0' }}</strong>
+    </div>
+    <div class="card stat-card">
+      <span>Gastos del año</span>
+      <strong>{{ yearTotal() | currency: 'ARS' : 'symbol' : '1.0-0' }}</strong>
+    </div>
+    <div class="card stat-card">
+      <span>Registros</span>
+      <strong>{{ list().length }}</strong>
+    </div>
+  </div>
+
+  <div class="grid charts-grid mt-2">
+    <div class="card">
+      <h4 class="card-title">Gastos por categoría</h4>
+      @if (byCategory().labels.length > 0) {
+        <app-chart [type]="'doughnut'" [labels]="byCategory().labels" [datasets]="byCategoryDatasets()" />
+      } @else {
+        <p class="text-muted small">Sin datos.</p>
+      }
+    </div>
+
+    @if (!vehicleId) {
+      <div class="card">
+        <h4 class="card-title">Gastos por vehículo</h4>
+        @if (byVehicle().labels.length > 0) {
+          <app-chart [type]="'bar'" [labels]="byVehicle().labels" [datasets]="byVehicleDatasets()" />
+        } @else {
+          <p class="text-muted small">Sin datos.</p>
+        }
+      </div>
+    }
+
+    <div class="card">
+      <h4 class="card-title">Gastos últimos 6 meses</h4>
+      @if (byMonth().labels.length > 0) {
+        <app-chart [type]="'line'" [labels]="byMonth().labels" [datasets]="byMonthDatasets()" />
+      } @else {
+        <p class="text-muted small">Sin datos.</p>
+      }
+    </div>
+  </div>
+
+  @if (list().length === 0) {
+    <div class="card empty-state mt-2">
+      <div class="icon">💰</div>
+      <h3>No hay gastos registrados</h3>
+      <p>Registrá el primer gasto para ver las estadísticas.</p>
+    </div>
+  } @else {
+    <div class="card table-responsive mt-2">
+      <table class="table">
+        <thead>
+          <tr>
+            @if (!vehicleId) { <th>Vehículo</th> }
+            <th>Categoría</th>
+            <th>Descripción</th>
+            <th>Fecha</th>
+            <th class="text-right">Importe</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of list(); track e.id) {
+            <tr>
+              @if (!vehicleId) { <td>{{ vehicleLabel(e.vehicle_id) }}</td> }
+              <td><span class="badge badge-muted">{{ e.category }}</span></td>
+              <td>{{ e.description || '—' }}</td>
+              <td>{{ e.date | date: 'dd/MM/yyyy' }}</td>
+              <td class="text-right bold">{{ e.amount | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
+              <td class="text-right">
+                <button class="btn btn-ghost btn-sm" type="button" (click)="openEdit(e)">✎</button>
+                <button class="btn btn-ghost btn-sm text-danger" type="button" (click)="remove(e)">🗑</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}
+
+<!-- Modal alta/edición de gasto -->
+<app-modal [open]="showModal()" [title]="editing() ? 'Editar gasto' : 'Registrar gasto'" (close)="closeModal()">
+  @if (formError()) {
+    <div class="alert alert-error">{{ formError() }}</div>
+  }
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label class="form-label" for="expense_vehicle">Vehículo *</label>
+      <select id="expense_vehicle" class="form-control" formControlName="vehicle_id">
+        @for (v of vehiclesService.vehicles(); track v.id) {
+          <option [value]="v.id">{{ v.brand }} {{ v.model }} ({{ v.license_plate || v.unit_number }})</option>
+        }
+      </select>
+      @if (!vehiclesService.vehicles().length) {
+        <span class="form-hint">Registrá un vehículo antes de cargar gastos.</span>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="expense_category">Categoría *</label>
+        <select id="expense_category" class="form-control" formControlName="category">
+          @for (c of categories; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="expense_amount">Importe ($) *</label>
+        <input id="expense_amount" type="number" step="0.01" class="form-control" [class.is-invalid]="!!(form.get('amount')?.invalid && form.get('amount')?.touched)" formControlName="amount" />
+        @if (form.get('amount')?.invalid && form.get('amount')?.touched) {
+          <span class="form-error">{{ errorMessage(form.get('amount')?.errors ?? null, 'El importe') }}</span>
+        }
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="expense_date">Fecha *</label>
+        <input id="expense_date" type="date" class="form-control" formControlName="date" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="expense_description">Descripción</label>
+      <input id="expense_description" type="text" class="form-control" formControlName="description" placeholder="Carga de nafta, seguro..." />
+    </div>
+
+    <div class="flex mt-2">
+      <button class="btn btn-primary" type="submit" [disabled]="saving()">
+        @if (saving()) { <span class="spinner"></span> Guardando... } @else { {{ editing() ? 'Guardar cambios' : 'Registrar gasto' }} }
+      </button>
+      <button class="btn btn-outline" type="button" (click)="closeModal()">Cancelar</button>
+    </div>
+  </form>
+</app-modal>

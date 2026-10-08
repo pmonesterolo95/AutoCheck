@@ -1,0 +1,27 @@
+@if (service.open()) {
+  <div class="modal-backdrop" (click)="service.resolve(false)">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'confirm-title'"
+      (click)="$event.stopPropagation()"
+    >
+      <h3 id="confirm-title">{{ service.request().title }}</h3>
+      <p>{{ service.request().message }}</p>
+      <div class="actions">
+        <button class="btn btn-outline" type="button" (click)="service.resolve(false)">Cancelar</button>
+        <button
+          class="btn"
+          [class.btn-danger]="service.request().danger"
+          [class.btn-primary]="!service.request().danger"
+          type="button"
+          autofocus
+          (click)="service.resolve(true)"
+        >
+          {{ service.request().confirmLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
