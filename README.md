@@ -33,7 +33,8 @@ npm install
 1. Crear un proyecto nuevo en Supabase.
 2. Abrir **SQL Editor** y ejecutar en orden:
    - `supabase/schema.sql` → **borra todo lo existente y recrea** tablas, funciones, RLS y buckets de Storage (¡destructivo!).
-   - `supabase/seed.sql` → carga tipos de mantenimiento, tipos de vehículo, usuarios de prueba y datos de ejemplo.
+    - `supabase/seed.sql` → **borra la demo anterior y regenera todo**: catálogos, usuarios de prueba y datos de ejemplo (se puede correr N veces).
+> Si tu base ya existía y solo te falta la tabla de combustible: `supabase/migration-fuel-logs.sql` (incluida en `schema.sql` para instalaciones nuevas).
 3. Copiar la **URL del proyecto** y la **anon key pública** (Settings → API).
 4. Pegarlas en `src/environments/environment.ts`:
 
@@ -47,12 +48,14 @@ export const environment = {
 
 > La anon key es pública por diseño. Nunca se usa el **service_role key** en el frontend.
 
-### Cuentas de prueba (creadas por `seed.sql`)
+### Cuentas de prueba (creadas por `seed.sql`, contraseña `AutoCheck2024!` en todas)
 
-| Rol | Email | Contraseña |
+| Uso | Email | Contraseña |
 |---|---|---|
-| Usuario | `usuario@test.com` | `AutoCheck2024!` |
+| Particular (1 auto) | `usuario@test.com` | `AutoCheck2024!` |
 | Admin | `admin@test.com` | `AutoCheck2024!` |
+| Flota (5 unidades con alertas) | `flota@test.com` | `AutoCheck2024!` |
+| Particular (auto + moto) | `familia@test.com` | `AutoCheck2024!` |
 
 ### Solución de problemas de setup
 

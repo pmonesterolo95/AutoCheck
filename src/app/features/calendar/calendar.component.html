@@ -1,0 +1,84 @@
+@if (!ready()) {
+  <div class="page-loading"><span class="spinner"></span> Cargando calendario...</div>
+} @else {
+  <div class="flex-between wrap gap-3 mb-2">
+    <div>
+      <h2 class="mb-0">Calendario de vencimientos</h2>
+      <p class="text-muted small mb-0">Documentos, recordatorios y próximos services.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="btn btn-ghost btn-sm" type="button" (click)="prev()" aria-label="Mes anterior">←</button>
+      <button class="btn btn-outline btn-sm" type="button" (click)="today()">Hoy</button>
+      <button class="btn btn-ghost btn-sm" type="button" (click)="next()" aria-label="Mes siguiente">→</button>
+    </div>
+  </div>
+
+  <div class="card animate-fade-in">
+    <h4 class="card-title">{{ monthLabel() }}</h4>
+
+    <div class="cal-grid cal-head">
+      @for (wd of weekdays; track wd) {
+        <span>{{ wd }}</span>
+      }
+    </div>
+
+    <div class="cal-grid">
+      @for (day of cells(); track $index) {
+        @if (day == null) {
+          <span class="cal-day empty"></span>
+        } @else {
+          <button
+            type="button"
+            class="cal-day"
+            [class.today]="isToday(day)"
+            [class.selected]="isSelected(day)"
+            [class.has-items]="(byDay().get(day) ?? []).length > 0"
+            (click)="selectDay(day)"
+          >
+            <span class="cal-num">{{ day }}</span>
+            @if ((byDay().get(day) ?? []).length > 0) {
+              <span class="cal-dots">
+                @for (t of (byDay().get(day) ?? []).slice(0, 3); track t.title + t.detail) {
+                  <i [class.overdue]="t.severity === 'vencido'" [class.warn]="t.severity === 'proximo'"></i>
+                }
+                @if ((byDay().get(day) ?? []).length > 3) {
+                  <b>+{{ (byDay().get(day) ?? []).length - 3 }}</b>
+                }
+              </span>
+            }
+          </button>
+        }
+      }
+    </div>
+
+    <div class="cal-legend">
+      <span><i class="overdue"></i> Vencido</span>
+      <span><i class="warn"></i> Próximo</span>
+    </div>
+  </div>
+
+  @if (selected()) {
+    <div class="card mt-2 animate-fade-in">
+      <h4 class="card-title">{{ selectedLabel() }}</h4>
+      @if (selectedItems().length === 0) {
+        <p class="text-muted small mb-0">Sin vencimientos este día. 🎉</p>
+      } @else {
+        <ul class="cal-list">
+          @for (t of selectedItems(); track t.title + t.detail) {
+            <li>
+              <span class="t-dot" [class.overdue]="t.severity === 'vencido'" [class.warn]="t.severity === 'proximo'"></span>
+              <div class="t-body">
+                <div class="t-title">{{ t.title }}</div>
+                <div class="small text-muted">{{ t.detail }} · {{ t.kind }}</div>
+              </div>
+              <span class="badge" [class.badge-danger]="t.severity === 'vencido'" [class.badge-warning]="t.severity === 'proximo'">
+                {{ t.severity === 'vencido' ? 'Vencido' : 'Próximo' }}
+              </span>
+              <a class="btn btn-ghost btn-sm" [routerLink]="t.link">Ver</a>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+}

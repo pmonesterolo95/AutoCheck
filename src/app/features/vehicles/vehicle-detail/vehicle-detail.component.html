@@ -40,10 +40,13 @@
         </div>
       </div>
 
-      <div class="flex wrap actions">
+      <div class="flex flex-wrap gap-2 actions">
         <a class="btn btn-accent btn-sm" [routerLink]="['/vehicles', v.id, 'maintenance', 'new']">+ Mantenimiento</a>
         <a class="btn btn-primary btn-sm" [routerLink]="['/vehicles', v.id, 'expenses', 'new']">+ Gasto</a>
         <a class="btn btn-outline btn-sm" [routerLink]="['/vehicles', v.id, 'edit']">Editar</a>
+        <button class="btn btn-outline btn-sm" type="button" (click)="exportSheet()" [disabled]="exporting()">
+          @if (exporting()) { <span class="spinner"></span> Generando... } @else { ⬇ Ficha PDF }
+        </button>
       </div>
     </div>
   </div>
@@ -56,6 +59,10 @@
     <a class="card quick" [routerLink]="['/vehicles', v.id, 'expenses']">
       <strong>💰 Gastos</strong>
       <small>Combustible, seguros y más</small>
+    </a>
+    <a class="card quick" [routerLink]="['/vehicles', v.id, 'fuel']">
+      <strong>⛽ Combustible</strong>
+      <small>Cargas y consumo km/l</small>
     </a>
     <a class="card quick" [routerLink]="['/vehicles', v.id, 'documents']">
       <strong>📄 Documentación</strong>

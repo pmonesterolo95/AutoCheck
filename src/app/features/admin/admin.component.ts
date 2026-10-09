@@ -7,13 +7,14 @@ import { MaintenanceTypesService } from '../../core/services/maintenance-types.s
 import { VehicleTypesService } from '../../core/services/vehicle-types.service';
 import { ConfirmService } from '../../shared/components/confirm-dialog/confirm.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { PaginatorComponent, loadPageSize } from '../../shared/components/paginator/paginator.component';
 
 type Tab = 'stats' | 'users' | 'vehicles' | 'types' | 'vehicleTypes';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, ReactiveFormsModule, ModalComponent],
+  imports: [CurrencyPipe, DatePipe, ReactiveFormsModule, ModalComponent, PaginatorComponent],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
 })
@@ -70,10 +71,24 @@ export class AdminComponent {
 
   setTab(t: Tab): void {
     this.tab.set(t);
+    this.usersPage.set(1);
+    this.vehiclesPage.set(1);
     if (t === 'stats') this.loadStats();
     if (t === 'users') this.admin.loadUsers();
     if (t === 'vehicles') this.admin.loadVehicles();
   }
+
+  readonly usersPage = signal(1);
+  readonly usersPageSize = signal(loadPageSize('pg-admin-users'));
+  readonly pagedUsers = computed(() =>
+    this.users().slice((this.usersPage() - 1) * this.usersPageSize(), this.usersPage() * this.usersPageSize()),
+  );
+
+  readonly vehiclesPage = signal(1);
+  readonly vehiclesPageSize = signal(loadPageSize('pg-admin-veh'));
+  readonly pagedVehicles = computed(() =>
+    this.vehicles().slice((this.vehiclesPage() - 1) * this.vehiclesPageSize(), this.vehiclesPage() * this.vehiclesPageSize()),
+  );
 
   private async loadStats(): Promise<void> {
     this.loadingStats.set(true);

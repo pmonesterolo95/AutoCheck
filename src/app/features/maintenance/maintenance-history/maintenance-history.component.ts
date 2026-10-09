@@ -1,14 +1,15 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { MaintenancesService } from '../../../core/services/maintenances.service';
 import { VehiclesService } from '../../../core/services/vehicles.service';
 import { ConfirmService } from '../../../shared/components/confirm-dialog/confirm.service';
+import { PaginatorComponent, loadPageSize } from '../../../shared/components/paginator/paginator.component';
 
 @Component({
   selector: 'app-maintenance-history',
   standalone: true,
-  imports: [RouterLink, DatePipe, CurrencyPipe],
+  imports: [RouterLink, DatePipe, CurrencyPipe, PaginatorComponent],
   templateUrl: './maintenance-history.component.html',
   styleUrl: './maintenance-history.component.scss',
 })
@@ -24,6 +25,12 @@ export class MaintenanceHistoryComponent {
   readonly list = this.maintenances.maintenances;
   readonly loading = this.maintenances.loading;
   readonly deleting = signal<string | null>(null);
+
+  readonly page = signal(1);
+  readonly pageSize = signal(loadPageSize('pg-maint'));
+  readonly pagedList = computed(() =>
+    this.list().slice((this.page() - 1) * this.pageSize(), this.page() * this.pageSize()),
+  );
 
   constructor() {
     if (!this.vehicleId) {
@@ -60,5 +67,12 @@ export class MaintenanceHistoryComponent {
     this.deleting.set(null);
     if (error) return;
     await this.maintenances.load(this.vehicleId);
+    this.clampPage();
+  }
+
+  /** Si al borrar quedó una página vacía, vuelve a la última con datos. */
+  private clampPage(): void {
+    const max = Math.max(1, Math.ceil(this.list().length / this.pageSize()));
+    if (this.page() > max) this.page.set(max);
   }
 }

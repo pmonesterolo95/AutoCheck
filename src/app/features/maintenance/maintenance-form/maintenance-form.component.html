@@ -58,7 +58,28 @@
         <textarea id="notes" rows="2" class="form-control" formControlName="notes" placeholder="Detalles adicionales"></textarea>
       </div>
 
-      <div class="flex mt-2">
+      @if (!isEdit() && nextDue(); as due) {
+        <div class="next-service">
+          <label class="next-service-check">
+            <input
+              type="checkbox"
+              [checked]="autoReminder()"
+              (change)="autoReminder.set($any($event.target).checked)"
+            />
+            <span>
+              <strong>Programar el próximo service automáticamente</strong>
+              <small>
+                Se creará un recordatorio de “{{ due.typeName }}” para
+                @if (due.nextKm != null) { <b>{{ due.nextKm.toLocaleString('es-AR') }} km</b> }
+                @if (due.nextKm != null && due.nextDate) { y/o }
+                @if (due.nextDate) { el <b>{{ due.nextDate.split('-')[2] }}/{{ due.nextDate.split('-')[1] }}/{{ due.nextDate.split('-')[0] }}</b> }.
+              </small>
+            </span>
+          </label>
+        </div>
+      }
+
+      <div class="flex flex-wrap gap-2 mt-2">
         <button class="btn btn-primary" type="submit" [disabled]="saving()">
           @if (saving()) { <span class="spinner"></span> Guardando... } @else { {{ isEdit() ? 'Guardar cambios' : 'Registrar mantenimiento' }} }
         </button>

@@ -1,65 +1,125 @@
-.tabs {
-  display: flex;
-  gap: 0.4rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1.25rem;
+/* Admin minimalista: segmented control + catálogos en lista.
+   El resto (cards, tablas, badges, forms) viene de src/styles.css. */
+:host {
+  display: block;
+}
+
+.seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
   overflow-x: auto;
-}
-.tab {
-  background: none;
-  border: none;
-  padding: 0.6rem 1rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-  font-family: inherit;
-  border-radius: 8px 8px 0 0;
-  transition: color 0.15s;
-}
-.tab:hover { color: var(--text); }
-.tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
-}
-
-.stat-card {
-  display: grid;
-  gap: 0.25rem;
-}
-.stat-card span {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.stat-card strong {
-  font-size: 1.5rem;
-}
-.stat-card small {
-  color: var(--text-muted);
-  font-size: 0.75rem;
-}
-
-.type-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0.9rem 1rem;
+  padding: 4px;
+  border-radius: 999px;
   background: var(--surface-2);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-.type-card > .small.text-muted {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin: 0;
-  flex: 1;
+  border: 1px solid var(--border);
 }
 
-.vtype-icon {
-  font-size: 1.1rem;
-  margin-right: 0.35rem;
+.seg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.83rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.seg-btn svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+.seg-btn:hover {
+  color: var(--text);
+}
+.seg-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+}
+
+.seg-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.seg-btn.active .seg-count {
+  background: var(--primary-light);
+  border-color: transparent;
+  color: var(--primary-dark);
+}
+.dark .seg-btn.active .seg-count {
+  color: var(--text);
+}
+
+.stat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.catalog {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.catalog-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+.catalog-row:last-child {
+  border-bottom: none;
+}
+.catalog-row:hover {
+  background: var(--surface-2);
+}
+.catalog-name {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.catalog-desc {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.catalog-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  opacity: 0.65;
+  transition: opacity 0.15s ease;
+}
+.catalog-row:hover .catalog-actions,
+.catalog-row:focus-within .catalog-actions {
+  opacity: 1;
+}
+@media (hover: none) {
+  .catalog-actions {
+    opacity: 1;
+  }
 }

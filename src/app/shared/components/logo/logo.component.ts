@@ -1,9 +1,9 @@
 import { Component, input } from '@angular/core';
 
 /**
- * Marca de AutoCheck: tile redondeado navy con un "check" sobre una línea
- * de ruta/road y un punto ámbar de acento. Escala desde 16px (favicon) hasta
- * tamaños de héroe sin perder nitidez (SVG, sin defs ni gradientes duplicados).
+ * Marca de AutoCheck (v2): aro de rueda + check de verificación
+ * con un segmento ámbar de acento, sobre tile redondeado con
+ * degradado navy. SVG minimalista, nítido de 16px a hero.
  */
 @Component({
   selector: 'app-logo',
@@ -16,27 +16,30 @@ import { Component, input } from '@angular/core';
       viewBox="0 0 48 48"
       xmlns="http://www.w3.org/2000/svg"
       role="img">
-      <rect x="4" y="4" width="40" height="40" rx="12" fill="#0f4c81" />
+      <defs>
+        <linearGradient id="autocheckLogoGrad" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#0f4c81" />
+          <stop offset="1" stop-color="#1d6fb8" />
+        </linearGradient>
+      </defs>
+      <rect x="4" y="4" width="40" height="40" rx="12" fill="url(#autocheckLogoGrad)" />
+      <rect x="4" y="4" width="40" height="40" rx="12" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1" />
+      <circle cx="24" cy="24" r="10.5" fill="none" stroke="#ffffff" stroke-width="3.4" />
       <path
-        d="M14 6h12a16 16 0 0 1 16 16v2a10 10 0 0 0-6-2A20 20 0 0 0 14 22V6z"
-        fill="rgba(255,255,255,0.14)"
-      />
-      <path
-        d="M10.5 33.5c5.5-3.5 9-3.5 13.5-1.5 4.5 2 8 2 13.5-1.5"
-        stroke="rgba(255,255,255,0.32)"
-        stroke-width="2.2"
+        d="M29.3 14.9 A10.5 10.5 0 0 1 34.3 22.2"
         fill="none"
+        stroke="#f59e0b"
+        stroke-width="3.4"
         stroke-linecap="round"
       />
       <path
-        d="M15.5 24l5.4 5.4L33 16.5"
-        stroke="#ffffff"
-        stroke-width="4.6"
+        d="M19 24.2l3.6 3.6L29.4 20"
         fill="none"
+        stroke="#ffffff"
+        stroke-width="3.6"
         stroke-linecap="round"
         stroke-linejoin="round"
       />
-      <circle cx="35.5" cy="14" r="3" fill="#f59e0b" />
     </svg>
   `,
   styles: `

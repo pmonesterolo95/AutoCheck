@@ -15,8 +15,8 @@
     @for (item of items; track item.link) {
       <li>
         <a [routerLink]="item.link" [routerLinkActiveOptions]="{ exact: item.exact === true }"
-           routerLinkActive="active" (click)="close.emit()" [title]="collapsed ? item.label : undefined">
-          <span class="icon">{{ item.icon }}</span>
+           routerLinkActive="active" (click)="close.emit()" [attr.data-tip]="item.label">
+          <span class="icon" aria-hidden="true">{{ item.icon }}</span>
           <span class="label">{{ item.label }}</span>
         </a>
       </li>
@@ -26,8 +26,8 @@
       <li class="section">Administración</li>
       @for (item of adminItems; track item.link) {
         <li>
-          <a [routerLink]="item.link" routerLinkActive="active" (click)="close.emit()" [title]="collapsed ? item.label : undefined">
-            <span class="icon">{{ item.icon }}</span>
+          <a [routerLink]="item.link" routerLinkActive="active" (click)="close.emit()" [attr.data-tip]="item.label">
+            <span class="icon" aria-hidden="true">{{ item.icon }}</span>
             <span class="label">{{ item.label }}</span>
           </a>
         </li>

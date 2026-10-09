@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -7,6 +7,7 @@ import { VehiclesService } from '../../../core/services/vehicles.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmService } from '../../../shared/components/confirm-dialog/confirm.service';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { PaginatorComponent, loadPageSize } from '../../../shared/components/paginator/paginator.component';
 import { CustomValidators } from '../../../shared/forms/validators';
 import { Reminder, ReminderPayload } from '../../../core/models/reminder.interface';
 import { ReminderStatus } from '../../../core/models/enums';
@@ -14,7 +15,7 @@ import { ReminderStatus } from '../../../core/models/enums';
 @Component({
   selector: 'app-reminder-list',
   standalone: true,
-  imports: [RouterLink, DatePipe, ReactiveFormsModule, ModalComponent],
+  imports: [RouterLink, DatePipe, ReactiveFormsModule, ModalComponent, PaginatorComponent],
   templateUrl: './reminder-list.component.html',
   styleUrl: './reminder-list.component.scss',
 })
@@ -34,6 +35,13 @@ export class ReminderListComponent {
   readonly editing = signal<Reminder | null>(null);
   readonly saving = signal(false);
   readonly formError = signal<string | null>(null);
+  readonly viewing = signal<Reminder | null>(null);
+
+  readonly page = signal(1);
+  readonly pageSize = signal(loadPageSize('pg-rem'));
+  readonly pagedList = computed(() =>
+    this.list().slice((this.page() - 1) * this.pageSize(), this.page() * this.pageSize()),
+  );
 
   readonly form = this.fb.nonNullable.group({
     vehicle_id: ['', [Validators.required]],
@@ -87,7 +95,7 @@ export class ReminderListComponent {
   }
 
   openEdit(r: Reminder): void {
-    this.editing.set(r);
+    this.viewing.set(null);    this.editing.set(r);
     this.formError.set(null);
     this.form.patchValue({
       vehicle_id: r.vehicle_id,
@@ -103,6 +111,40 @@ export class ReminderListComponent {
   closeModal(): void {
     this.showModal.set(false);
     this.form.get('vehicle_id')?.enable();
+  }
+
+  openDetail(r: Reminder): void {
+    this.viewing.set(r);
+  }
+
+  closeDetail(): void {
+    this.viewing.set(null);
+  }
+
+  /** Texto relativo del vencimiento (fecha y/o km). */
+  dueText(r: Reminder): string {
+    const parts: string[] = [];
+    if (r.reminder_date) {
+      const days = Math.ceil((new Date(r.reminder_date).getTime() - Date.now()) / 86400000);
+      if (days < 0) parts.push(`Venció hace ${Math.abs(days)} días`);
+      else if (days === 0) parts.push('Vence hoy');
+      else if (days === 1) parts.push('Vence mañana');
+      else parts.push(`Vence en ${days} días`);
+    }
+    if (r.reminder_km != null) {
+      const vehicle = this.vehiclesService.vehicles().find((v) => v.id === r.vehicle_id);
+      if (vehicle) {
+        const missing = r.reminder_km - vehicle.current_km;
+        parts.push(
+          missing <= 0
+            ? `Alcanzó los ${r.reminder_km.toLocaleString('es-AR')} km`
+            : `Faltan ${missing.toLocaleString('es-AR')} km`,
+        );
+      } else {
+        parts.push(`A los ${r.reminder_km.toLocaleString('es-AR')} km`);
+      }
+    }
+    return parts.length > 0 ? parts.join(' · ') : 'Sin fecha ni kilometraje';
   }
 
   async submit(): Promise<void> {
@@ -157,5 +199,7 @@ export class ReminderListComponent {
     const { error } = await this.remindersService.delete(r.id);
     if (error) return;
     this.list.update((items) => items.filter((x) => x.id !== r.id));
+    const max = Math.max(1, Math.ceil(this.list().length / this.pageSize()));
+    if (this.page() > max) this.page.set(max);
   }
 }

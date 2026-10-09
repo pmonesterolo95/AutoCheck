@@ -11,13 +11,15 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { CustomValidators, errorMessage } from '../../../shared/forms/validators';
 import { EXPENSE_CATEGORIES } from '../../../core/models/enums';
 import { Expense, ExpensePayload } from '../../../core/models/expense.interface';
+import { exportExpensesExcel, exportExpensesPdf } from '../../../shared/utils/exporter';
+import { PaginatorComponent, loadPageSize } from '../../../shared/components/paginator/paginator.component';
 
 const PALETTE = ['#0f4c81', '#f59e0b', '#16a34a', '#dc2626', '#2563eb', '#7c3aed', '#0ea5e9', '#84cc16'];
 
 @Component({
   selector: 'app-expenses-list',
   standalone: true,
-  imports: [RouterLink, DatePipe, CurrencyPipe, ReactiveFormsModule, ModalComponent, ChartComponent],
+  imports: [RouterLink, DatePipe, CurrencyPipe, ReactiveFormsModule, ModalComponent, ChartComponent, PaginatorComponent],
   templateUrl: './expenses-list.component.html',
   styleUrl: './expenses-list.component.scss',
 })
@@ -40,6 +42,12 @@ export class ExpensesListComponent {
   readonly editing = signal<Expense | null>(null);
   readonly saving = signal(false);
   readonly formError = signal<string | null>(null);
+
+  readonly page = signal(1);
+  readonly pageSize = signal(loadPageSize('pg-exp'));
+  readonly pagedList = computed(() =>
+    this.list().slice((this.page() - 1) * this.pageSize(), this.page() * this.pageSize()),
+  );
 
   readonly form = this.fb.nonNullable.group({
     vehicle_id: ['', [Validators.required]],
@@ -143,6 +151,16 @@ export class ExpensesListComponent {
     return v ? `${v.brand} ${v.model}` : 'Vehículo';
   }
 
+  exportExcel(): void {
+    const rows = this.list().map((expense) => ({ expense, vehicleLabel: this.vehicleLabel(expense.vehicle_id) }));
+    exportExpensesExcel(rows, this.vehicleId ? this.vehicleLabel(this.vehicleId) : 'flota');
+  }
+
+  exportPdf(): void {
+    const rows = this.list().map((expense) => ({ expense, vehicleLabel: this.vehicleLabel(expense.vehicle_id) }));
+    exportExpensesPdf(rows, this.vehicleId ? this.vehicleLabel(this.vehicleId) : 'Toda la flota');
+  }
+
   openNew(): void {
     this.editing.set(null);
     this.formError.set(null);
@@ -210,6 +228,8 @@ export class ExpensesListComponent {
     const { error } = await this.expensesService.delete(expense.id);
     if (error) return;
     this.list.update((items) => items.filter((e) => e.id !== expense.id));
+    const max = Math.max(1, Math.ceil(this.list().length / this.pageSize()));
+    if (this.page() > max) this.page.set(max);
   }
 }
 

@@ -1,196 +1,268 @@
-<h2>Panel de administración</h2>
-<p class="text-muted small mb-2">Gestión general de la aplicación.</p>
+<div class="animate-fade-in max-w-6xl">
+  <!-- Encabezado minimalista -->
+  <div class="mb-5">
+    <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)] mb-1">Administración</p>
+    <h2 class="text-xl sm:text-2xl font-bold tracking-tight m-0">Panel de administración</h2>
+    <p class="text-sm text-[var(--text-muted)] m-0 mt-1">Gestión general de la aplicación.</p>
+  </div>
 
-<div class="tabs">
-  <button class="tab" [class.active]="tab() === 'stats'" type="button" (click)="setTab('stats')">📊 Estadísticas</button>
-  <button class="tab" [class.active]="tab() === 'users'" type="button" (click)="setTab('users')">👥 Usuarios</button>
-  <button class="tab" [class.active]="tab() === 'vehicles'" type="button" (click)="setTab('vehicles')">🚗 Vehículos</button>
-  <button class="tab" [class.active]="tab() === 'types'" type="button" (click)="setTab('types')">🔧 Tipos de mantenimiento</button>
-  <button class="tab" [class.active]="tab() === 'vehicleTypes'" type="button" (click)="setTab('vehicleTypes')">🚙 Tipos de vehículo</button>
-</div>
+  <!-- Segmented control -->
+  <div class="seg" role="tablist" aria-label="Secciones de administración">
+    <button class="seg-btn" [class.active]="tab() === 'stats'" type="button" role="tab" [attr.aria-selected]="tab() === 'stats'" (click)="setTab('stats')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+      <span>Resumen</span>
+    </button>
+    <button class="seg-btn" [class.active]="tab() === 'users'" type="button" role="tab" [attr.aria-selected]="tab() === 'users'" (click)="setTab('users')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+      <span>Usuarios</span>
+      <span class="seg-count">{{ users().length }}</span>
+    </button>
+    <button class="seg-btn" [class.active]="tab() === 'vehicles'" type="button" role="tab" [attr.aria-selected]="tab() === 'vehicles'" (click)="setTab('vehicles')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+      <span>Vehículos</span>
+      <span class="seg-count">{{ vehicles().length }}</span>
+    </button>
+    <button class="seg-btn" [class.active]="tab() === 'types'" type="button" role="tab" [attr.aria-selected]="tab() === 'types'" (click)="setTab('types')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085" /></svg>
+      <span>Mantenimiento</span>
+    </button>
+    <button class="seg-btn" [class.active]="tab() === 'vehicleTypes'" type="button" role="tab" [attr.aria-selected]="tab() === 'vehicleTypes'" (click)="setTab('vehicleTypes')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.375 3H12m0 0h2.625M12 3v13.5m0 0c-3.174 0-5.25 1.5-5.25 3.75S8.826 24 12 24s5.25-1.5 5.25-3.75S15.174 16.5 12 16.5z" /></svg>
+      <span>Tipos</span>
+    </button>
+  </div>
 
-<!-- ============ ESTADÍSTICAS ============ -->
-@if (tab() === 'stats') {
-  @if (loadingStats()) {
-    <div class="page-loading"><span class="spinner"></span> Calculando estadísticas...</div>
-  } @else if (stats(); as s) {
-    <div class="grid grid-4 mt-2">
-      <div class="card stat-card">
-        <span>Usuarios registrados</span>
-        <strong>{{ s.totalUsers }}</strong>
-        <small>ADMIN: {{ userCountByRole().admins }} · USER: {{ userCountByRole().users }}</small>
+  <!-- ============ RESUMEN ============ -->
+  @if (tab() === 'stats') {
+    @if (loadingStats()) {
+      <div class="page-loading"><span class="spinner"></span> Calculando estadísticas...</div>
+    } @else if (stats(); as s) {
+      <div class="grid grid-4 mt-2 animate-fade-in">
+        <div class="card stat-card">
+          <div class="flex items-center gap-2">
+            <span class="stat-dot bg-blue-500"></span>
+            <span>Usuarios</span>
+          </div>
+          <strong class="tabular-nums">{{ s.totalUsers }}</strong>
+          <small>{{ userCountByRole().admins }} admin · {{ userCountByRole().users }} usuarios</small>
+        </div>
+        <div class="card stat-card">
+          <div class="flex items-center gap-2">
+            <span class="stat-dot bg-emerald-500"></span>
+            <span>Vehículos</span>
+          </div>
+          <strong class="tabular-nums">{{ s.totalVehicles }}</strong>
+          <small>Unidades registradas</small>
+        </div>
+        <div class="card stat-card">
+          <div class="flex items-center gap-2">
+            <span class="stat-dot bg-amber-500"></span>
+            <span>Mantenimientos</span>
+          </div>
+          <strong class="tabular-nums">{{ s.totalMaintenances }}</strong>
+          <small>Servicios cargados</small>
+        </div>
+        <div class="card stat-card">
+          <div class="flex items-center gap-2">
+            <span class="stat-dot bg-purple-500"></span>
+            <span>Gasto del mes</span>
+          </div>
+          <strong class="tabular-nums">{{ s.monthExpenses | currency: 'ARS' : 'symbol' : '1.0-0' }}</strong>
+          <small>Total: {{ s.totalExpenses | currency: 'ARS' : 'symbol' : '1.0-0' }}</small>
+        </div>
       </div>
-      <div class="card stat-card">
-        <span>Vehículos registrados</span>
-        <strong>{{ s.totalVehicles }}</strong>
+
+      <div class="card mt-2 animate-fade-in-up">
+        <h4 class="card-title">Usuarios recientes <span class="badge badge-neutral">{{ users().length }}</span></h4>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Fecha de alta</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (u of users().slice(0, 5); track u.id) {
+                <tr>
+                  <td class="bold">{{ u.full_name || '—' }}</td>
+                  <td>{{ u.email }}</td>
+                  <td>
+                    <span class="badge" [class.badge-success]="u.role === 'ADMIN'" [class.badge-muted]="u.role === 'USER'">
+                      {{ u.role === 'ADMIN' ? 'Administrador' : 'Usuario' }}
+                    </span>
+                  </td>
+                  <td>{{ u.created_at | date: 'dd/MM/yyyy' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div class="card stat-card">
-        <span>Mantenimientos</span>
-        <strong>{{ s.totalMaintenances }}</strong>
+    }
+  }
+
+  <!-- ============ USUARIOS ============ -->
+  @if (tab() === 'users') {
+    @if (users().length === 0) {
+      <div class="card empty-state mt-2 animate-fade-in">
+        <div class="icon">👥</div>
+        <h3>Sin usuarios</h3>
+        <p>Todavía no hay usuarios registrados en la plataforma.</p>
       </div>
-      <div class="card stat-card">
-        <span>Gasto total (mes)</span>
-        <strong>{{ s.monthExpenses | currency: 'ARS' : 'symbol' : '1.0-0' }}</strong>
-        <small>Total histórico: {{ s.totalExpenses | currency: 'ARS' : 'symbol' : '1.0-0' }}</small>
+    } @else {
+    <div class="card table-responsive mt-2 animate-fade-in">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Vehículos</th>
+            <th>Gasto total</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of pagedUsers(); track u.id) {
+            <tr>
+              <td class="bold">{{ u.full_name || '—' }}</td>
+              <td>{{ u.email }}</td>
+              <td>
+                <span class="badge" [class.badge-success]="u.role === 'ADMIN'" [class.badge-muted]="u.role === 'USER'">
+                  {{ u.role === 'ADMIN' ? 'Administrador' : 'Usuario' }}
+                </span>
+              </td>
+              <td class="tabular-nums">{{ u.vehicle_count }}</td>
+              <td class="tabular-nums">{{ u.expense_total | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
+              <td class="text-right">
+                <button class="btn btn-outline btn-sm" type="button" (click)="toggleRole(u)">
+                  {{ u.role === 'ADMIN' ? 'Quitar admin' : 'Hacer admin' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <app-paginator [(page)]="usersPage" [(pageSize)]="usersPageSize" [total]="users().length" storageKey="pg-admin-users" />
+    </div>
+    }
+  }
+
+  <!-- ============ VEHÍCULOS ============ -->
+  @if (tab() === 'vehicles') {
+    @if (vehicles().length === 0) {
+      <div class="card empty-state mt-2 animate-fade-in">
+        <div class="icon">🚗</div>
+        <h3>Sin vehículos</h3>
+        <p>Todavía no hay vehículos registrados en la plataforma.</p>
       </div>
+    } @else {
+    <div class="card table-responsive mt-2 animate-fade-in">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Vehículo</th>
+            <th>Tipo</th>
+            <th>Patente</th>
+            <th>Año</th>
+            <th>KM</th>
+            <th>Combustible</th>
+            <th>Propietario</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (v of pagedVehicles(); track v.id) {
+            <tr>
+              <td class="bold">{{ v.brand }} {{ v.model }}</td>
+              <td>{{ vehicleTypeLabel(v.vehicle_type_id) }}</td>
+              <td><span class="badge badge-muted">{{ v.license_plate }}</span></td>
+              <td class="tabular-nums">{{ v.year }}</td>
+              <td class="tabular-nums">{{ v.current_km.toLocaleString('es-AR') }} km</td>
+              <td>{{ v.fuel_type }}</td>
+              <td>{{ ownerOf(v.user_id) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <app-paginator [(page)]="vehiclesPage" [(pageSize)]="vehiclesPageSize" [total]="vehicles().length" storageKey="pg-admin-veh" />
+    </div>
+    }
+  }
+
+  <!-- ============ TIPOS DE MANTENIMIENTO ============ -->
+  @if (tab() === 'types') {
+    <div class="flex-between wrap mt-2 gap-3 animate-fade-in">
+      <p class="text-muted small m-0">Catálogo disponible para todos los usuarios.</p>
+      <button class="btn btn-primary btn-sm" type="button" (click)="openNewType()">+ Nuevo tipo</button>
     </div>
 
-    <div class="card mt-2">
-      <h4 class="card-title">Usuarios recientes</h4>
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Fecha de alta</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (u of users().slice(0, 5); track u.id) {
-              <tr>
-                <td class="bold">{{ u.full_name || '—' }}</td>
-                <td>{{ u.email }}</td>
-                <td>
-                  <span class="badge" [class.badge-success]="u.role === 'ADMIN'" [class.badge-muted]="u.role === 'USER'">
-                    {{ u.role === 'ADMIN' ? 'Administrador' : 'Usuario' }}
-                  </span>
-                </td>
-                <td>{{ u.created_at | date: 'dd/MM/yyyy' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+    <div class="card mt-2 p-0 overflow-hidden animate-fade-in-up">
+      @if (types().length === 0) {
+        <div class="empty-state">
+          <div class="icon">🔧</div>
+          <h3>Sin tipos de mantenimiento</h3>
+          <p>Creá el primero con el botón “Nuevo tipo”.</p>
+        </div>
+      } @else {
+      <ul class="catalog">
+        @for (t of types(); track t.id) {
+          <li class="catalog-row">
+            <div class="min-w-0">
+              <p class="catalog-name">{{ t.name }}</p>
+              <p class="catalog-desc">{{ t.description || 'Sin descripción' }}</p>
+              <div class="flex flex-wrap gap-1.5 mt-1.5">
+                @if (t.recommended_km) { <span class="badge badge-muted">{{ t.recommended_km.toLocaleString('es-AR') }} km</span> }
+                @if (t.recommended_months) { <span class="badge badge-muted">{{ t.recommended_months }} meses</span> }
+                @if (!t.recommended_km && !t.recommended_months) { <span class="badge badge-muted">Sin intervalo</span> }
+              </div>
+            </div>
+            <div class="catalog-actions">
+              <button class="btn btn-ghost btn-sm" type="button" (click)="openEditType(t.id, t.name)" title="Editar">✎</button>
+              <button class="btn btn-ghost btn-sm text-danger" type="button" (click)="removeType(t.id, t.name)" title="Eliminar">🗑</button>
+            </div>
+          </li>
+        }
+      </ul>
+      }
     </div>
   }
-}
 
-<!-- ============ USUARIOS ============ -->
-@if (tab() === 'users') {
-  <div class="card table-responsive mt-2">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Usuario</th>
-          <th>Email</th>
-          <th>Rol</th>
-          <th>Vehículos</th>
-          <th>Gasto total</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (u of users(); track u.id) {
-          <tr>
-            <td class="bold">{{ u.full_name || '—' }}</td>
-            <td>{{ u.email }}</td>
-            <td>
-              <span class="badge" [class.badge-success]="u.role === 'ADMIN'" [class.badge-muted]="u.role === 'USER'">
-                {{ u.role === 'ADMIN' ? 'Administrador' : 'Usuario' }}
-              </span>
-            </td>
-            <td>{{ u.vehicle_count }}</td>
-            <td>{{ u.expense_total | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
-            <td>
-              <button class="btn btn-outline btn-sm" type="button" (click)="toggleRole(u)">
-                {{ u.role === 'ADMIN' ? 'Quitar admin' : 'Hacer admin' }}
-              </button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-}
+  <!-- ============ TIPOS DE VEHÍCULO ============ -->
+  @if (tab() === 'vehicleTypes') {
+    <div class="flex-between wrap mt-2 gap-3 animate-fade-in">
+      <p class="text-muted small m-0">Autos, motos, camiones, maquinaria, etc.</p>
+      <button class="btn btn-primary btn-sm" type="button" (click)="openNewVType()">+ Nuevo tipo</button>
+    </div>
 
-<!-- ============ VEHÍCULOS ============ -->
-@if (tab() === 'vehicles') {
-  <div class="card table-responsive mt-2">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Vehículo</th>
-          <th>Tipo</th>
-          <th>Patente</th>
-          <th>Año</th>
-          <th>KM</th>
-          <th>Combustible</th>
-          <th>Propietario</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (v of vehicles(); track v.id) {
-          <tr>
-            <td class="bold">{{ v.brand }} {{ v.model }}</td>
-            <td>{{ vehicleTypeLabel(v.vehicle_type_id) }}</td>
-            <td><span class="badge badge-muted">{{ v.license_plate }}</span></td>
-            <td>{{ v.year }}</td>
-            <td>{{ v.current_km.toLocaleString('es-AR') }} km</td>
-            <td>{{ v.fuel_type }}</td>
-            <td>{{ ownerOf(v.user_id) }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-}
-
-<!-- ============ TIPOS DE MANTENIMIENTO ============ -->
-@if (tab() === 'types') {
-  <div class="flex-between mt-2">
-    <p class="text-muted small">Catálogo de tipos de mantenimiento disponibles para todos los usuarios.</p>
-    <button class="btn btn-primary" type="button" (click)="openNewType()">+ Nuevo tipo</button>
-  </div>
-
-  <div class="card mt-2">
-    <div class="grid grid-3">
-      @for (t of types(); track t.id) {
-        <div class="type-card">
-          <div class="flex-between">
-            <strong>{{ t.name }}</strong>
-            <div class="flex">
-              <button class="btn btn-ghost btn-sm" type="button" (click)="openEditType(t.id, t.name)">✎</button>
-              <button class="btn btn-ghost btn-sm text-danger" type="button" (click)="removeType(t.id, t.name)">🗑</button>
-            </div>
-          </div>
-          <p class="small text-muted">{{ t.description || 'Sin descripción' }}</p>
-          <div class="small">
-            @if (t.recommended_km) { <span class="badge badge-muted">{{ t.recommended_km.toLocaleString('es-AR') }} km</span> }
-            @if (t.recommended_months) { <span class="badge badge-muted">{{ t.recommended_months }} meses</span> }
-            @if (!t.recommended_km && !t.recommended_months) { <span class="badge badge-muted">Sin intervalo</span> }
-          </div>
+    <div class="card mt-2 p-0 overflow-hidden animate-fade-in-up">
+      @if (vehicleTypes().length === 0) {
+        <div class="empty-state">
+          <div class="icon">🚙</div>
+          <h3>Sin tipos de vehículo</h3>
+          <p>Creá el primero con el botón “Nuevo tipo”.</p>
         </div>
+      } @else {
+      <ul class="catalog">
+        @for (t of vehicleTypes(); track t.id) {
+          <li class="catalog-row">
+            <div class="min-w-0">
+              <p class="catalog-name"><span class="vtype-icon">{{ t.icon }}</span> {{ t.name }}</p>
+              <p class="catalog-desc">{{ t.description || 'Sin descripción' }}</p>
+            </div>
+            <div class="catalog-actions">
+              <button class="btn btn-ghost btn-sm" type="button" (click)="openEditVType(t.id, t.name)" title="Editar">✎</button>
+              <button class="btn btn-ghost btn-sm text-danger" type="button" (click)="removeVType(t.id, t.name)" title="Eliminar">🗑</button>
+            </div>
+          </li>
+        }
+      </ul>
       }
     </div>
-  </div>
-}
-
-<!-- ============ TIPOS DE VEHÍCULO ============ -->
-@if (tab() === 'vehicleTypes') {
-  <div class="flex-between mt-2">
-    <p class="text-muted small">Catálogo de tipos de vehículo/automotor disponibles para todos los usuarios (autos, motos, camiones, maquinaria, etc.).</p>
-    <button class="btn btn-primary" type="button" (click)="openNewVType()">+ Nuevo tipo</button>
-  </div>
-
-  <div class="card mt-2">
-    <div class="grid grid-3">
-      @for (t of vehicleTypes(); track t.id) {
-        <div class="type-card">
-          <div class="flex-between">
-            <strong><span class="vtype-icon">{{ t.icon }}</span> {{ t.name }}</strong>
-            <div class="flex">
-              <button class="btn btn-ghost btn-sm" type="button" (click)="openEditVType(t.id, t.name)">✎</button>
-              <button class="btn btn-ghost btn-sm text-danger" type="button" (click)="removeVType(t.id, t.name)">🗑</button>
-            </div>
-          </div>
-          <p class="small text-muted">{{ t.description || 'Sin descripción' }}</p>
-        </div>
-      }
-    </div>
-  </div>
-}
+  }
+</div>
 
 <!-- Modal tipo de vehículo -->
 <app-modal [open]="showVTypeModal()" [title]="editingVType() ? 'Editar tipo de vehículo' : 'Nuevo tipo de vehículo'" (close)="showVTypeModal.set(false)">
@@ -216,7 +288,7 @@
       <label class="form-label" for="vtype_desc">Descripción</label>
       <input id="vtype_desc" type="text" class="form-control" formControlName="description" />
     </div>
-    <div class="flex mt-2">
+    <div class="flex flex-wrap gap-2 mt-2">
       <button class="btn btn-primary" type="submit" [disabled]="savingVType()">
         @if (savingVType()) { <span class="spinner"></span> Guardando... } @else { {{ editingVType() ? 'Guardar cambios' : 'Crear tipo' }} }
       </button>
@@ -252,7 +324,7 @@
         <input id="type_months" type="number" class="form-control" formControlName="recommended_months" />
       </div>
     </div>
-    <div class="flex mt-2">
+    <div class="flex flex-wrap gap-2 mt-2">
       <button class="btn btn-primary" type="submit" [disabled]="savingType()">
         @if (savingType()) { <span class="spinner"></span> Guardando... } @else { {{ editingType() ? 'Guardar cambios' : 'Crear tipo' }} }
       </button>

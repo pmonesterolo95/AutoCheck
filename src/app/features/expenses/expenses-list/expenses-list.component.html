@@ -5,11 +5,13 @@
       @if (vehicleId) { Gastos de este vehículo. } @else { Todos los gastos de tus vehículos. }
     </p>
   </div>
-  <div class="flex">
+  <div class="flex flex-wrap gap-2">
     @if (vehicleId) {
       <a class="btn btn-outline" [routerLink]="['/vehicles', vehicleId]">← Vehículo</a>
     }
     <button class="btn btn-primary" type="button" (click)="openNew()">+ Registrar gasto</button>
+    <button class="btn btn-outline btn-sm" type="button" (click)="exportExcel()" title="Descargar planilla Excel">⬇ Excel</button>
+    <button class="btn btn-outline btn-sm" type="button" (click)="exportPdf()" title="Descargar informe PDF">⬇ PDF</button>
   </div>
 </div>
 
@@ -82,7 +84,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (e of list(); track e.id) {
+          @for (e of pagedList(); track e.id) {
             <tr>
               @if (!vehicleId) { <td>{{ vehicleLabel(e.vehicle_id) }}</td> }
               <td><span class="badge badge-muted">{{ e.category }}</span></td>
@@ -97,6 +99,7 @@
           }
         </tbody>
       </table>
+      <app-paginator [(page)]="page" [(pageSize)]="pageSize" [total]="list().length" storageKey="pg-exp" />
     </div>
   }
 }
@@ -146,7 +149,7 @@
       <input id="expense_description" type="text" class="form-control" formControlName="description" placeholder="Carga de nafta, seguro..." />
     </div>
 
-    <div class="flex mt-2">
+    <div class="flex flex-wrap gap-2 mt-2">
       <button class="btn btn-primary" type="submit" [disabled]="saving()">
         @if (saving()) { <span class="spinner"></span> Guardando... } @else { {{ editing() ? 'Guardar cambios' : 'Registrar gasto' }} }
       </button>

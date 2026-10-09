@@ -22,6 +22,9 @@ export class ChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() datasets: ChartDataset[] = [];
   @Input() height = 240;
   @Input() legend = true;
+  /** false para magnitudes no monetarias (ej. km/l) + sufijo opcional. */
+  @Input() money = true;
+  @Input() unit = '';
 
   @ViewChild('canvas') private canvas!: ElementRef<HTMLCanvasElement>;
 
@@ -43,6 +46,13 @@ export class ChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (!this.canvas) return;
     this.chart?.destroy();
 
+    const money = this.money;
+    const unit = this.unit ? ` ${this.unit}` : '';
+    const fmt = (value: number): string =>
+      money
+        ? `$${value.toLocaleString('es-AR')}`
+        : `${value.toLocaleString('es-AR', { maximumFractionDigits: 2 })}${unit}`;
+
     const isPie = this.type === 'doughnut' || this.type === 'pie';
     this.chart = new Chart(this.canvas.nativeElement, {
       type: this.type,
@@ -56,7 +66,7 @@ export class ChartComponent implements AfterViewInit, OnChanges, OnDestroy {
             callbacks: {
               label: (ctx) => {
                 const value = Number(ctx.raw ?? 0);
-                return `${ctx.dataset.label ?? ''}: $${value.toLocaleString('es-AR')}`;
+                return `${ctx.dataset.label ?? ''}: ${fmt(value)}`;
               },
             },
           },
@@ -65,7 +75,7 @@ export class ChartComponent implements AfterViewInit, OnChanges, OnDestroy {
           ? undefined
           : {
               y: {
-                ticks: { callback: (value) => `$${Number(value).toLocaleString('es-AR')}` },
+                ticks: { callback: (value) => fmt(Number(value)) },
               },
               x: {},
             },

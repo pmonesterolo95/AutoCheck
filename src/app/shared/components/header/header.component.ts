@@ -4,11 +4,12 @@ import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationsService } from '../../../core/services/notifications.service';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [DatePipe, SlicePipe, UpperCasePipe, RouterLink],
+  imports: [DatePipe, SlicePipe, UpperCasePipe, RouterLink, ThemeToggleComponent],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })

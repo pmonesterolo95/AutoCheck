@@ -53,17 +53,44 @@
               <tr>
                 <th>Vehículo</th>
                 <th>KM</th>
+                <th class="text-right">Costo/km</th>
+                <th>Salud</th>
                 <th>Estado</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              @for (v of vehicles(); track v.id) {
+              @for (v of pagedVehicles(); track v.id) {
                 <tr>
                   <td class="bold">{{ v.brand }} {{ v.model }}
                     <div class="small text-muted">{{ v.license_plate || (v.unit_number ? 'N° ' + v.unit_number : 'Sin dominio') }}</div>
                   </td>
                   <td>{{ v.current_km.toLocaleString('es-AR') }} km</td>
+                  <td class="text-right">
+                    @if (costOf(v.id).perKm != null) {
+                      <span class="bold">{{ costOf(v.id).perKm! | currency: 'ARS' : 'symbol' : '1.0-0' }}</span>
+                      <div class="small text-muted">TCO {{ costOf(v.id).tco | currency: 'ARS' : 'symbol' : '1.0-0' }}</div>
+                    } @else {
+                      <span class="text-muted small">—</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="health" [attr.title]="'Salud: ' + healthOf(v.id).label">
+                      <svg viewBox="0 0 36 36" class="health-ring" [attr.data-tone]="healthOf(v.id).tone" aria-hidden="true">
+                        <circle cx="18" cy="18" r="15.9" class="health-bg" />
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="15.9"
+                          class="health-fg"
+                          pathLength="100"
+                          [attr.stroke-dasharray]="healthOf(v.id).score + ' 100'"
+                        />
+                      </svg>
+                      <b>{{ healthOf(v.id).score }}</b>
+                    </span>
+                    <div class="small text-muted">{{ healthOf(v.id).label }}</div>
+                  </td>
                   <td>
                     <app-status-badge [status]="vehicleStatus(v).status" />
                   </td>
@@ -74,6 +101,13 @@
               }
             </tbody>
           </table>
+          <app-paginator
+            [(page)]="vehiclesPage"
+            [(pageSize)]="vehiclesPageSize"
+            [pageSizes]="[5, 10]"
+            [total]="vehicles().length"
+            storageKey="pg-dash-veh"
+          />
         </div>
       }
     </div>
@@ -96,12 +130,36 @@
     </div>
   </div>
 
+  <!-- Timeline próximos 90 días -->
+  <div class="card mt-2">
+    <h4 class="card-title">Próximos 90 días
+      <span class="badge badge-neutral">{{ timeline().length }}</span>
+    </h4>
+    @if (timeline().length === 0) {
+      <p class="text-muted small mb-0">Nada por vencer en los próximos 90 días. 🎉</p>
+    } @else {
+      <ul class="timeline">
+        @for (t of timeline(); track t.title + t.detail + t.dateLabel) {
+          <li>
+            <span class="t-dot" [class.overdue]="t.severity === 'vencido'" [class.warn]="t.severity === 'proximo'"></span>
+            <div class="t-body">
+              <div class="t-date" [class.overdue-text]="t.severity === 'vencido'">{{ t.dateLabel }}</div>
+              <div class="t-title">{{ t.title }}</div>
+              <div class="small text-muted">{{ t.detail }} · {{ t.kind }}</div>
+            </div>
+            <a class="btn btn-ghost btn-sm" [routerLink]="t.link">Ver</a>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
   <!-- Últimos mantenimientos -->
   <div class="card mt-2">
     <h4 class="card-title">Últimos mantenimientos
       <a class="btn btn-ghost btn-sm" routerLink="/maintenances">Ver todos</a>
     </h4>
-    @if (lastMaintenances().length === 0) {
+    @if (maintTotal() === 0) {
       <p class="text-muted small">Aún no registraste mantenimientos.</p>
     } @else {
       <div class="table-responsive">
@@ -115,8 +173,8 @@
               <th class="text-right">Costo</th>
             </tr>
           </thead>
-          <tbody>
-            @for (m of lastMaintenances(); track m.id) {
+            <tbody>
+              @for (m of pagedMaintenances(); track m.id) {
               <tr>
                 <td>{{ vehicleOf(m.vehicle_id) ? vehicleOf(m.vehicle_id)!.brand + ' ' + vehicleOf(m.vehicle_id)!.model : '—' }}</td>
                 <td>{{ m.maintenance_type?.name ?? 'Mantenimiento' }}</td>
@@ -125,9 +183,16 @@
                 <td class="text-right bold">{{ m.cost | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
               </tr>
             }
-          </tbody>
-        </table>
-      </div>
-    }
-  </div>
-}
+            </tbody>
+          </table>
+          <app-paginator
+            [(page)]="maintPage"
+            [(pageSize)]="maintPageSize"
+            [pageSizes]="[5, 10]"
+            [total]="maintTotal()"
+            storageKey="pg-dash-maint"
+          />
+        </div>
+      }
+    </div>
+  }

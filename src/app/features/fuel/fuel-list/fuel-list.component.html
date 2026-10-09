@@ -1,0 +1,171 @@
+<div class="flex-between wrap">
+  <div>
+    <h2>Combustible</h2>
+    <p class="text-muted small mb-2">
+      @if (vehicleId) { Cargas de este vehículo. } @else { Todas las cargas de tus vehículos. }
+    </p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    @if (vehicleId) {
+      <a class="btn btn-outline" [routerLink]="['/vehicles', vehicleId]">← Vehículo</a>
+    }
+    <button class="btn btn-primary" type="button" (click)="openNew()">+ Cargar combustible</button>
+  </div>
+</div>
+
+@if (needsMigration()) {
+  <div class="alert alert-warning mt-2" role="alert">
+    <span>Falta activar el módulo de combustible: ejecutá <b>supabase/migration-fuel-logs.sql</b> en el SQL Editor de Supabase y recargá.</span>
+  </div>
+}
+
+@if (loading()) {
+  <div class="page-loading"><span class="spinner"></span> Cargando combustible...</div>
+} @else if (!needsMigration()) {
+  <div class="grid grid-4 mt-2">
+    <div class="card stat-card">
+      <span>Último consumo</span>
+      <strong>{{ lastConsumption() ? (lastConsumption()!.kmPerLiter | number: '1.1-1') + ' km/l' : '—' }}</strong>
+      <small>Entre tanques llenos</small>
+    </div>
+    <div class="card stat-card">
+      <span>Promedio</span>
+      <strong>{{ avgConsumption() ? (avgConsumption()! | number: '1.1-1') + ' km/l' : '—' }}</strong>
+      <small>Últimas 5 mediciones</small>
+    </div>
+    <div class="card stat-card">
+      <span>Litros totales</span>
+      <strong>{{ totalLiters() | number: '1.0-0' }} l</strong>
+      <small>En el período listado</small>
+    </div>
+    <div class="card stat-card">
+      <span>Gasto del mes</span>
+      <strong>{{ monthFuelSpend() | currency: 'ARS' : 'symbol' : '1.0-0' }}</strong>
+      <small>Solo combustible</small>
+    </div>
+  </div>
+
+  @if (dropAlert() != null) {
+    <div class="alert alert-warning mt-2" role="alert">
+      <span>El último consumo cayó un <b>{{ dropAlert() }}%</b> respecto del promedio. Revisá presión de neumáticos, filtros o el último service.</span>
+    </div>
+  }
+
+  <div class="card mt-2">
+    <h4 class="card-title">Evolución del consumo</h4>
+    @if (chartData().labels.length > 1) {
+      <app-chart [type]="'line'" [labels]="chartData().labels" [datasets]="chartDatasets()" [legend]="false" [money]="false" [unit]="'km/l'" />
+    } @else {
+      <p class="text-muted small mb-0">Cargá al menos 3 tanques llenos para ver la evolución.</p>
+    }
+  </div>
+
+  @if (list().length === 0) {
+    <div class="card empty-state mt-2">
+      <div class="icon">⛽</div>
+      <h3>No hay cargas registradas</h3>
+      <p>Cargá combustible con litros y kilometraje para medir el consumo real.</p>
+    </div>
+  } @else {
+    <div class="card table-responsive mt-2">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            @if (!vehicleId) { <th>Vehículo</th> }
+            <th class="text-right">KM</th>
+            <th class="text-right">Litros</th>
+            <th class="text-right">km/l</th>
+            <th class="text-right">Importe</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of pagedList(); track l.id) {
+            <tr>
+              <td>{{ l.date | date: 'dd/MM/yyyy' }}</td>
+              @if (!vehicleId) { <td>{{ vehicleLabel(l.vehicle_id) }}</td> }
+              <td class="text-right tabular-nums">{{ l.kilometers.toLocaleString('es-AR') }}</td>
+              <td class="text-right tabular-nums">
+                {{ l.liters | number: '1.0-2' }}
+                @if (!l.full_tank) { <span class="badge badge-neutral">parcial</span> }
+              </td>
+              <td class="text-right tabular-nums bold">
+                {{ consumptionOf(l.id) != null ? (consumptionOf(l.id)! | number: '1.1-1') : '—' }}
+              </td>
+              <td class="text-right bold">{{ l.amount | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
+              <td class="text-right">
+                <button class="btn btn-ghost btn-sm" type="button" (click)="openEdit(l)">✎</button>
+                <button class="btn btn-ghost btn-sm text-danger" type="button" (click)="remove(l)">🗑</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <app-paginator [(page)]="page" [(pageSize)]="pageSize" [total]="list().length" storageKey="pg-fuel" />
+    </div>
+  }
+}
+
+<!-- Modal alta/edición de carga -->
+<app-modal [open]="showModal()" [title]="editing() ? 'Editar carga' : 'Cargar combustible'" (close)="closeModal()">
+  @if (formError()) {
+    <div class="alert alert-error">{{ formError() }}</div>
+  }
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    @if (!vehicleId) {
+      <div class="form-group">
+        <label class="form-label" for="fuel_vehicle">Vehículo *</label>
+        <select id="fuel_vehicle" class="form-control" formControlName="vehicle_id">
+          <option value="" disabled>Seleccioná...</option>
+          @for (v of vehiclesService.vehicles(); track v.id) {
+            <option [value]="v.id">{{ v.brand }} {{ v.model }}</option>
+          }
+        </select>
+      </div>
+    }
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="fuel_date">Fecha *</label>
+        <input id="fuel_date" type="date" class="form-control" formControlName="date" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fuel_km">Kilometraje *</label>
+        <input id="fuel_km" type="number" class="form-control" formControlName="kilometers" placeholder="58450" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="fuel_liters">Litros *</label>
+        <input id="fuel_liters" type="number" step="0.01" class="form-control" formControlName="liters" placeholder="42.5" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fuel_amount">Importe ($) *</label>
+        <input id="fuel_amount" type="number" step="0.01" class="form-control" formControlName="amount" placeholder="58000" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="flex items-center gap-2 cursor-pointer text-sm">
+        <input type="checkbox" formControlName="full_tank" class="w-4 h-4 accent-primary" />
+        Tanque lleno (necesario para medir el consumo)
+      </label>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="fuel_station">Estación</label>
+        <input id="fuel_station" type="text" class="form-control" formControlName="station" placeholder="YPF, Shell..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fuel_notes">Notas</label>
+        <input id="fuel_notes" type="text" class="form-control" formControlName="notes" placeholder="Opcional" />
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mt-2">
+      <button class="btn btn-primary" type="submit" [disabled]="saving()">
+        @if (saving()) { <span class="spinner"></span> Guardando... } @else { {{ editing() ? 'Guardar cambios' : 'Registrar carga' }} }
+      </button>
+      <button class="btn btn-outline" type="button" (click)="closeModal()">Cancelar</button>
+    </div>
+  </form>
+</app-modal>

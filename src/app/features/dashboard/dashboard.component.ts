@@ -11,8 +11,10 @@ import { NotificationsService } from '../../core/services/notifications.service'
 import { AuthService } from '../../core/services/auth.service';
 import { supabase } from '../../core/config/supabase.client';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
+import { PaginatorComponent, loadPageSize } from '../../shared/components/paginator/paginator.component';
 import { checkMaintenance } from '../../shared/utils/maintenance-status';
 import { documentStatus } from '../../shared/utils/document-status';
+import { TimelineItem, buildTimeline } from '../../shared/utils/upcoming';
 import { Vehicle } from '../../core/models/vehicle.interface';
 import { MaintenanceStatus } from '../../core/models/enums';
 
@@ -22,10 +24,21 @@ export interface DashboardAlert {
   message: string;
 }
 
+export interface VehicleCost {
+  tco: number;
+  perKm: number | null;
+}
+
+export interface VehicleHealth {
+  score: number;
+  label: string;
+  tone: 'ok' | 'good' | 'warn' | 'bad';
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, DatePipe, CurrencyPipe, StatusBadgeComponent],
+  imports: [RouterLink, DatePipe, CurrencyPipe, StatusBadgeComponent, PaginatorComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -68,8 +81,7 @@ export class DashboardComponent {
     await this.syncNotifications();
   }
 
-  readonly monthExpenses = computed(() => {
-    const now = new Date();
+  readonly monthExpenses = computed(() => {    const now = new Date();
     return this.expensesService
       .expenses()
       .filter((e) => {
@@ -80,6 +92,21 @@ export class DashboardComponent {
   });
 
   readonly lastMaintenances = computed(() => this.maintenancesService.maintenances().slice(0, 5));
+
+  readonly vehiclesPage = signal(1);
+  readonly vehiclesPageSize = signal(loadPageSize('pg-dash-veh', 5));
+  readonly pagedVehicles = computed(() =>
+    this.vehicles().slice((this.vehiclesPage() - 1) * this.vehiclesPageSize(), this.vehiclesPage() * this.vehiclesPageSize()),
+  );
+
+  readonly maintPage = signal(1);
+  readonly maintPageSize = signal(loadPageSize('pg-dash-maint', 5));
+  readonly maintTotal = computed(() => this.maintenancesService.maintenances().length);
+  readonly pagedMaintenances = computed(() =>
+    this.maintenancesService
+      .maintenances()
+      .slice((this.maintPage() - 1) * this.maintPageSize(), this.maintPage() * this.maintPageSize()),
+  );
 
   /** Estado general de un vehículo considerando todos sus mantenimientos. */
   vehicleStatus(vehicle: Vehicle): { status: MaintenanceStatus; label: string; reason: string; pending: number } {
@@ -172,6 +199,89 @@ export class DashboardComponent {
   vehicleOf(id: string): Vehicle | undefined {
     return this.vehiclesService.vehicles().find((v) => v.id === id);
   }
+
+  /** TCO y costo por km de cada vehículo (gastos + mantenimientos). */
+  readonly vehicleCosts = computed(() => {
+    const map = new Map<string, VehicleCost>();
+    const allMaint = this.maintenancesService.maintenances();
+    const allExp = this.expensesService.expenses();
+    for (const v of this.vehiclesService.vehicles()) {
+      const maint = allMaint.filter((m) => m.vehicle_id === v.id);
+      const tco =
+        allExp.filter((e) => e.vehicle_id === v.id).reduce((s, e) => s + (Number(e.amount) || 0), 0) +
+        maint.reduce((s, m) => s + (Number(m.cost) || 0), 0);
+      const kms = maint.map((m) => Number(m.kilometers)).filter((k) => Number.isFinite(k));
+      const minKm = kms.length > 0 ? Math.min(...kms) : null;
+      const driven = minKm != null ? v.current_km - minKm : 0;
+      map.set(v.id, { tco, perKm: driven > 0 ? tco / driven : null });
+    }
+    return map;
+  });
+
+  costOf(vehicleId: string): VehicleCost {
+    return this.vehicleCosts().get(vehicleId) ?? { tco: 0, perKm: null };
+  }
+
+  /** Score de salud 0-100 por vehículo (vencidos y próximos restan). */
+  readonly healthMap = computed(() => {
+    const map = new Map<string, { score: number; label: string; tone: string }>();
+    const types = this.typesService.types();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const v of this.vehiclesService.vehicles()) {
+      let score = 100;
+      const records = this.maintenancesService.maintenances().filter((m) => m.vehicle_id === v.id);
+      const byType = new Map<string, typeof records>();
+      for (const m of records) {
+        if (!byType.has(m.maintenance_type_id)) byType.set(m.maintenance_type_id, []);
+        byType.get(m.maintenance_type_id)!.push(m);
+      }
+      for (const [typeId, list] of byType) {
+        const last = [...list].sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+        const check = checkMaintenance(types, typeId, v.current_km, last.date, last.kilometers);
+        if (check.status === 'vencido') score -= 25;
+        else if (check.status === 'proximo') score -= 10;
+      }
+      for (const doc of this.documentsService.documents().filter((d) => d.vehicle_id === v.id)) {
+        const st = documentStatus(doc.expiration_date);
+        if (st.status === 'vencido') score -= 15;
+        else if (st.status === 'proximo') score -= 6;
+      }
+      let overdueReminders = 0;
+      for (const r of this.remindersService.reminders()) {
+        if (r.vehicle_id !== v.id || r.status === 'completado' || !r.reminder_date) continue;
+        if (new Date(r.reminder_date) < today) overdueReminders++;
+      }
+      score -= Math.min(overdueReminders * 8, 24);
+      score = Math.max(0, Math.min(100, score));
+
+      const label = score >= 90 ? 'Excelente' : score >= 70 ? 'Buena' : score >= 50 ? 'Atención' : 'Crítica';
+      const tone = score >= 90 ? 'ok' : score >= 70 ? 'good' : score >= 50 ? 'warn' : 'bad';
+      map.set(v.id, { score, label, tone });
+    }
+    return map;
+  });
+
+  healthOf(vehicleId: string): { score: number; label: string; tone: string } {
+    return this.healthMap().get(vehicleId) ?? { score: 100, label: 'Sin datos', tone: 'good' };
+  }
+
+  /** Próximos 90 días: documentos, recordatorios y services programados. */
+  readonly timeline = computed<TimelineItem[]>(() =>
+    buildTimeline(
+      {
+        vehicles: this.vehiclesService.vehicles(),
+        maintenances: this.maintenancesService.maintenances(),
+        types: this.typesService.types(),
+        documents: this.documentsService.documents(),
+        reminders: this.remindersService.reminders(),
+        vehicleLabel: (id) => this.vehicleLabel(id),
+      },
+      90,
+      10,
+    ),
+  );
 
   /** Crea notificaciones para las alertas más importantes (una vez por alerta). */
   private async syncNotifications(): Promise<void> {

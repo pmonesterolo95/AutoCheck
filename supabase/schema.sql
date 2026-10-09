@@ -21,6 +21,7 @@ drop trigger if exists on_auth_user_created on auth.users;
 -- 2) Tablas en orden inverso de dependencias (al caer, se eliminan
 --    en cascada sus políticas RLS; los índices se borran con su tabla)
 drop table if exists public.notifications;
+drop table if exists public.fuel_logs;
 drop table if exists public.reminders;
 drop table if exists public.documents;
 drop table if exists public.expenses;
@@ -170,6 +171,38 @@ create table if not exists public.documents (
 );
 
 -- ------------------------------------------------------------
+-- 6b. TABLA: fuel_logs (cargas de combustible para consumo km/l)
+-- ------------------------------------------------------------
+create table if not exists public.fuel_logs (
+  id uuid primary key default gen_random_uuid(),
+  vehicle_id uuid not null references public.vehicles (id) on delete cascade,
+  date date not null,
+  kilometers int not null check (kilometers >= 0),
+  liters numeric(10, 2) not null check (liters > 0),
+  amount numeric(12, 2) not null default 0 check (amount >= 0),
+  full_tank boolean not null default true,
+  station text,
+  notes text,
+  created_at timestamptz not null default now()
+);
+
+-- ------------------------------------------------------------
+-- 6b. TABLA: fuel_logs (cargas de combustible para consumo km/l)
+-- ------------------------------------------------------------
+create table if not exists public.fuel_logs (
+  id uuid primary key default gen_random_uuid(),
+  vehicle_id uuid not null references public.vehicles (id) on delete cascade,
+  date date not null,
+  kilometers int not null check (kilometers >= 0),
+  liters numeric(10, 2) not null check (liters > 0),
+  amount numeric(12, 2) not null default 0 check (amount >= 0),
+  full_tank boolean not null default true,
+  station text,
+  notes text,
+  created_at timestamptz not null default now()
+);
+
+-- ------------------------------------------------------------
 -- 7. TABLA: reminders
 -- ------------------------------------------------------------
 create table if not exists public.reminders (
@@ -205,6 +238,8 @@ create index if not exists idx_vehicles_type on public.vehicles (vehicle_type_id
 create index if not exists idx_vehicles_unit on public.vehicles (unit_number);
 create index if not exists idx_maintenances_vehicle on public.maintenances (vehicle_id, date desc);
 create index if not exists idx_expenses_vehicle_date on public.expenses (vehicle_id, date desc);
+create index if not exists idx_fuel_vehicle_date on public.fuel_logs (vehicle_id, date desc, kilometers desc);
+create index if not exists idx_fuel_vehicle_date on public.fuel_logs (vehicle_id, date desc, kilometers desc);
 create index if not exists idx_documents_vehicle on public.documents (vehicle_id);
 create index if not exists idx_reminders_vehicle on public.reminders (vehicle_id, reminder_date);
 create index if not exists idx_notifications_user on public.notifications (user_id, is_read, created_at desc);
@@ -286,6 +321,8 @@ alter table public.vehicle_types enable row level security;
 alter table public.maintenance_types enable row level security;
 alter table public.maintenances enable row level security;
 alter table public.expenses enable row level security;
+alter table public.fuel_logs enable row level security;
+alter table public.fuel_logs enable row level security;
 alter table public.documents enable row level security;
 alter table public.reminders enable row level security;
 alter table public.notifications enable row level security;
@@ -387,6 +424,40 @@ create policy "expenses_update" on public.expenses
 
 drop policy if exists "expenses_delete" on public.expenses;
 create policy "expenses_delete" on public.expenses
+  for delete using (public.owns_vehicle(vehicle_id));
+
+-- ---------- fuel_logs ----------
+drop policy if exists "fuel_select" on public.fuel_logs;
+create policy "fuel_select" on public.fuel_logs
+  for select using (public.owns_vehicle(vehicle_id) or public.is_admin());
+
+drop policy if exists "fuel_insert" on public.fuel_logs;
+create policy "fuel_insert" on public.fuel_logs
+  for insert with check (public.owns_vehicle(vehicle_id));
+
+drop policy if exists "fuel_update" on public.fuel_logs;
+create policy "fuel_update" on public.fuel_logs
+  for update using (public.owns_vehicle(vehicle_id));
+
+drop policy if exists "fuel_delete" on public.fuel_logs;
+create policy "fuel_delete" on public.fuel_logs
+  for delete using (public.owns_vehicle(vehicle_id));
+
+-- ---------- fuel_logs ----------
+drop policy if exists "fuel_select" on public.fuel_logs;
+create policy "fuel_select" on public.fuel_logs
+  for select using (public.owns_vehicle(vehicle_id) or public.is_admin());
+
+drop policy if exists "fuel_insert" on public.fuel_logs;
+create policy "fuel_insert" on public.fuel_logs
+  for insert with check (public.owns_vehicle(vehicle_id));
+
+drop policy if exists "fuel_update" on public.fuel_logs;
+create policy "fuel_update" on public.fuel_logs
+  for update using (public.owns_vehicle(vehicle_id));
+
+drop policy if exists "fuel_delete" on public.fuel_logs;
+create policy "fuel_delete" on public.fuel_logs
   for delete using (public.owns_vehicle(vehicle_id));
 
 -- ---------- documents ----------
@@ -501,3 +572,5 @@ grant select, insert, update, delete on all tables in schema public to authentic
 -- instalaciones parcheadas:
 grant select on public.vehicle_types to anon, authenticated;
 grant insert, update, delete on public.vehicle_types to authenticated;
+grant select, insert, update, delete on public.fuel_logs to authenticated;
+grant select, insert, update, delete on public.fuel_logs to authenticated;

@@ -32,8 +32,10 @@ export class SidebarComponent {
     { label: 'Mis vehículos', icon: '🚗', link: '/vehicles' },
     { label: 'Mantenimientos', icon: '🔧', link: '/maintenances' },
     { label: 'Gastos', icon: '💰', link: '/expenses' },
+    { label: 'Combustible', icon: '⛽', link: '/fuel' },
     { label: 'Documentación', icon: '📄', link: '/documents' },
     { label: 'Recordatorios', icon: '⏰', link: '/reminders' },
+    { label: 'Calendario', icon: '📅', link: '/calendar' },
     { label: 'AutoCheck IA', icon: '🤖', link: '/ai' },
   ];
 

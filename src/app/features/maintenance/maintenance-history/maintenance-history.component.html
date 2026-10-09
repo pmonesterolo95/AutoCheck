@@ -16,7 +16,7 @@
     </p>
   </div>
 
-  <div class="flex">
+  <div class="flex flex-wrap gap-2">
     @if (!vehicleId) {
       <button class="btn btn-primary" type="button" (click)="goCreate()">+ Registrar mantenimiento</button>
       <a class="btn btn-outline" routerLink="/vehicles">Mis vehículos</a>
@@ -50,7 +50,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (m of list(); track m.id) {
+        @for (m of pagedList(); track m.id) {
           <tr>
             <td class="bold">{{ m.maintenance_type?.name ?? 'Mantenimiento' }}</td>
             <td>{{ m.date | date: 'dd/MM/yyyy' }}</td>
@@ -66,5 +66,6 @@
         }
       </tbody>
     </table>
+    <app-paginator [(page)]="page" [(pageSize)]="pageSize" [total]="list().length" storageKey="pg-maint" />
   </div>
 }

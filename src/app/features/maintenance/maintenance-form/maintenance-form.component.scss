@@ -5,3 +5,41 @@
   margin-bottom: 0.6rem;
   padding-left: 0;
 }
+
+/* Caja de próximo service automático */
+.next-service {
+  margin: 0.4rem 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--primary-light);
+  border: 1px solid color-mix(in srgb, var(--color-primary-600) 25%, var(--border));
+}
+.next-service-check {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.next-service-check input {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.15rem;
+  accent-color: var(--color-primary-600);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.next-service-check strong {
+  display: block;
+  font-size: 0.9rem;
+}
+.next-service-check small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
+  line-height: 1.45;
+}
+.next-service-check small b {
+  color: var(--text);
+}
